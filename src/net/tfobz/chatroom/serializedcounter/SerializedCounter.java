@@ -1,4 +1,4 @@
-package net.tfobz.synchronization.serializedcounter;
+package net.tfobz.chatroom.serializedcounter;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

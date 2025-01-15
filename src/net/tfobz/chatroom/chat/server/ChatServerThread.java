@@ -1,4 +1,4 @@
-package net.tfobz.synchronization.chat.server;
+package net.tfobz.chatroom.chat.server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
