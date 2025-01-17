@@ -236,10 +236,19 @@ public class ChatClient extends JFrame {
 						ip = textFieldIP.getText();
 						port = Integer.valueOf(textFieldPort.getText());
 						username = textFieldUsername.getText();
-					} catch (Exception e1) {
+						connect();
+					} catch (UnknownHostException e1) {
 						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
+					} catch (IOException e2) {
+						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning", JOptionPane.WARNING_MESSAGE);
+					}finally {
+						try {
+							owner.client.close();
+						} catch (IOException e1) {
+							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning", JOptionPane.WARNING_MESSAGE);
+							System.exit(0);
+						}
 					}
-					connect();
 				}
 			});
 
