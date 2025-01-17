@@ -150,7 +150,7 @@ public class ChatClient extends JFrame {
 			in = new BufferedReader( new InputStreamReader(client.getInputStream()));
 			out = new PrintStream(client.getOutputStream());
 			
-			out.println(username + " logged in");
+			out.println(username);
 			
 			thread = new ChatClientThread(in);
 			thread.start();

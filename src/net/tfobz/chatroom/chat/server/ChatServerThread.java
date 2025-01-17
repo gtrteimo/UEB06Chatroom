@@ -5,48 +5,75 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.concurrent.Callable;
 
-public class ChatServerThread extends Thread
-{
-	private Socket client = null;
-	private BufferedReader in = null;
-	private PrintStream out = null;
+public class ChatServerThread implements Callable {
+		
+	private ChatServer owner;
 	
-	public ChatServerThread(Socket client) throws IOException {
+	private Socket client;
+	
+	private BufferedReader in;
+	private PrintStream out;
+	
+	private String name;
+	
+	public ChatServerThread(ChatServer owner, Socket client) throws IOException {
+		this.owner = owner;
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintStream(client.getOutputStream());
 	}
 	
 	@Override
-	public void run() {
-		try {
-			ChatServer.outputStreams.add(out);
+	public Object call() throws Exception {
+		try {			
+			name = in.readLine();
+			out.print(ChatServer.clientIDCounter++);
 			
-			String name = in.readLine();
-			System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
-			for (PrintStream outs: ChatServer.outputStreams)
+			System.out.println(name + " signed in. " + owner.outputStreams.size() + " users");
+			
+			for (PrintStream outs: owner.outputStreams) {
 				outs.println(name + " signed in");
-			
-			while (true) {
-				String line = in.readLine();
-				if (line == null)
-					break;
-				for (PrintStream outs: ChatServer.outputStreams)
-					outs.println(name + ": " + line);
 			}
 			
-			ChatServer.outputStreams.remove(out);
-			System.out.println(name + " signed out. " + ChatServer.outputStreams.size() + " users");
-			for (PrintStream outs: ChatServer.outputStreams)
-				outs.println(name + " signed out");
+			readInput();
+			
+			signOut();
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 			e.printStackTrace();
 			if (out != null)
-				ChatServer.outputStreams.remove(out);
+				owner.outputStreams.remove(out);
 		} finally {
 			try { client.close(); } catch (Exception e1) { ; }
+		}		
+		return null;
+	}
+	
+	private void readInput () throws IOException {
+		String line = in.readLine();
+		while (line != null && !line.isEmpty()) {
+			if (line.charAt(0) != '/') {
+				for (PrintStream outs: owner.outputStreams) {
+					outs.println(name + ": " + line);
+				}
+			} else {
+				command(line.substring(1));
+			}
+			line = in.readLine();
 		}
+	}
+	
+	private void signOut () {
+		owner.outputStreams.remove(out);
+		System.out.println(name + " signed out. " + owner.outputStreams.size() + " users");
+		for (PrintStream outs: owner.outputStreams) {
+			outs.println(name + " signed out");
+		}
+	}
+	
+	private void command (String commandString) {
+		//TODO
 	}
 }
