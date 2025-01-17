@@ -1,9 +1,10 @@
 package net.tfobz.chatroom.chat.client;
 
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,17 +13,14 @@ import java.net.Socket;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
-import com.sun.org.apache.bcel.internal.generic.CPInstruction;
-
-/**
- * @author Michael
- * @see http://www.vorlesungen.uos.de/informatik/b06/
- */
+@SuppressWarnings("serial")
 public class ChatClient extends JFrame {
 	private final static Color colours[][] = {
         {
@@ -49,8 +47,11 @@ public class ChatClient extends JFrame {
 	
 	Container contentPane;
 	
-	JTextArea textArea;
-	JTextField textField;
+	JScrollPane scrollPane1;
+	JScrollPane scrollPane2;
+	
+	JEditorPane textArea;
+	JEditorPane textField;
 	JButton button;
 	
 	public ChatClient () {
@@ -67,18 +68,34 @@ public class ChatClient extends JFrame {
 		int w = getWidth() - 6;
 		int h = getHeight() - 40;
 		
-		textArea = new JTextArea();
-		textField = new JTextField();
+		scrollPane1 = new JScrollPane();
+		scrollPane2 = new JScrollPane();
+		
+		textArea = new JEditorPane() {
+            @Override
+            public boolean getScrollableTracksViewportWidth() {
+                return true;
+            }
+        };
+        textField = new JEditorPane() {
+            @Override
+            public boolean getScrollableTracksViewportWidth() {
+                return true;
+            }
+        };
 		button = new JButton();
+		
+		textArea.setEditable(false);
+		textField.setEditable(true);
 		
 		button.setText("Send");
 		
-		textArea.setBounds(10, 10, w - 20, h - 20 - 60);
-		textField.setBounds(10, h - 60, w - 200, 50);
+		scrollPane1.setBounds(10, 10, w - 20, h - 20 - 60);
+		scrollPane2.setBounds(10, h - 60, w - 200, 50);
 		button.setBounds(10 + w - 190, h - 60, 170, 50);
 		
-		textArea.setFont(new Font ("Arial", Font.PLAIN, textField.getHeight() / 2 + 1));
-		textField.setFont(new Font ("Arial", Font.PLAIN, textField.getHeight() / 2 + 1));
+		textArea.setFont(new Font ("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
+		textField.setFont(new Font ("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
 		button.setFont(new Font ("Arial", Font.PLAIN, button.getHeight() / 2 + 1));
 		
 		textArea.setBackground(colours[0][2]);
@@ -88,14 +105,24 @@ public class ChatClient extends JFrame {
 		button.setBackground(colours[0][4]);
 		button.setForeground(colours[0][2]);
 		
+		scrollPane1.setBorder(null);
+		scrollPane2.setBorder(null);
 		textArea.setBorder(null);
 		textField.setBorder(null);
 		button.setBorder(null);
 		
 		button.setFocusPainted(false);
 		
-		contentPane.add(textArea);
-		contentPane.add(textField);
+		scrollPane1.setViewportView(textArea);
+		scrollPane2.setViewportView(textField);
+		
+		scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	    
+	    scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+	    scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+		
+		contentPane.add(scrollPane1);
+		contentPane.add(scrollPane2);
 		contentPane.add(button);
 	}
 	
@@ -130,8 +157,8 @@ public class ChatClient extends JFrame {
 	public static void main(String[] args) {
 		ChatClient c = new ChatClient();
 		c.setVisible(true);
-		c.login = c.new ChatLogin(c);
-		c.login.setVisible(true);
+//		c.login = c.new ChatLogin(c);
+//		c.login.setVisible(true);
 	}
 	
 	@SuppressWarnings("serial")
