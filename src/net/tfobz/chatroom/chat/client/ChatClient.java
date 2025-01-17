@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Scanner;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -31,17 +33,15 @@ public class ChatClient extends JFrame {
             new Color(111, 116, 146)
         }
     };
-	private static int ClientIDCounter = 0;
-	
-	public final int CLIENT_ID = ClientIDCounter++;
+	public final int CLIENT_ID = 0;
 	
 	public static final int DEFAULT_PORT = 65535;
 	public static final String DEFAULT_IP = "localhost";
-	public static final String DEFAULT_USERNAME = "user";
+	public static final String DEFAULT_USERNAME = "User-";
 	
 	private int port = DEFAULT_PORT;
 	private String ip = DEFAULT_IP;
-	private String username = DEFAULT_USERNAME + CLIENT_ID;
+	private String username;
 	
 	private ChatLogin login;
 	
@@ -54,8 +54,18 @@ public class ChatClient extends JFrame {
 	JEditorPane textField;
 	JButton button;
 	
+	private Socket client;
+	
+	private BufferedReader in;
+	private PrintStream out;
+	
+	private Scanner consoleIn;
+	
+	private ChatClientThread thread;
+	
 	public ChatClient () {
 		super();
+		
 		setBounds(25, 25, 1080, 720);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -85,7 +95,7 @@ public class ChatClient extends JFrame {
         };
 		button = new JButton();
 		
-		textArea.setEditable(false);
+//		textArea.setEditable(false);
 		textField.setEditable(true);
 		
 		button.setText("Send");
@@ -121,36 +131,44 @@ public class ChatClient extends JFrame {
 	    scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	    scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		
+	    button.addActionListener(e -> send());
+	    
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
-		contentPane.add(button);
+		contentPane.add(button);		
 	}
 	
-	private void connect () {
-		Socket client = null;
-		try {
+	public void connect () throws UnknownHostException, IOException {
+		client = null;
 			client = new Socket(ip, port);
-			BufferedReader in = 
-				new BufferedReader( new InputStreamReader(client.getInputStream()));
-			PrintStream out = new PrintStream(client.getOutputStream());
-			BufferedReader consoleIn =
-				new BufferedReader(new InputStreamReader(System.in));
+			in = new BufferedReader( new InputStreamReader(client.getInputStream()));
+			out = new PrintStream(client.getOutputStream());
 			
-			out.println(username);
+			out.println(username + " logged in");
 			
-			new ChatClientThread(in).start();
+			thread = new ChatClientThread(in);
+			thread.start();
 			
-			while (true) {
-				String line = consoleIn.readLine();
-				if (line == null)
-					// pressed [Ctrl]+Z to sign out
-					break;
-				out.println(line);
+//		CLIENT_ID = ClientIDCounter++;
+		if (username == null) {
+			username = DEFAULT_USERNAME + CLIENT_ID;
+		}
+	}
+	
+	private void send () {
+		try {
+			String textNew = textField.getText().trim().replaceAll("\n", "");
+			if (!textNew.isEmpty()) {
+				String textOld = textArea.getText().trim().replaceAll("\n", "");
+				if (!textOld.isEmpty()) {
+					textOld += "\n";
+				}
+//				textArea.setText(textOld + username + ": " + textNew);
+				out.println(textNew);
 			}
-		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
-		} finally {
-			try { client.close(); } catch (Exception e1) { ; }
+			textField.setText("");
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 	
