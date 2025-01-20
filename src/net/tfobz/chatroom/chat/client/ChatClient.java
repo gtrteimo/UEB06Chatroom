@@ -146,7 +146,6 @@ public class ChatClient extends JFrame {
 		try {
 			connect();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 //		Socket s = new Socket()
@@ -163,7 +162,7 @@ public class ChatClient extends JFrame {
 			out.println(username);
 			
 			thread = new ChatClientThread(in);
-			thread.start();
+//			thread.start();
 			
 //		CLIENT_ID = ClientIDCounter++;
 		if (username == null) {

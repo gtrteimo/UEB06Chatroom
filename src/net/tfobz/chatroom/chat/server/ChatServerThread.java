@@ -74,11 +74,11 @@ public class ChatServerThread implements Callable<Integer> {
 	}
 	
 	private void signOut () {
-		System.out.println(name + " signed out. " + owner.outputStreams.size() + " users");
-		
 		for (PrintStream outs: owner.outputStreams) {
 			outs.println(name + " signed out");
 		}
+		owner.outputStreams.remove(out);
+		System.out.println(name + " signed out. " + owner.outputStreams.size() + " users");
 	}
 	
 	private void command (String commandString) {

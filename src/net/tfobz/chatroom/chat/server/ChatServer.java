@@ -64,8 +64,7 @@ public class ChatServer {
 	private void accept () {
 		try {
 			while (true) {
-				Socket client = server.accept();
-								
+				Socket client = server.accept();								
 				executer.submit(new ChatServerThread(this, client));
 			}
 		} catch (IOException e) {
