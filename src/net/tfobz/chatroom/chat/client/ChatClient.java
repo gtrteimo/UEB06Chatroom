@@ -146,7 +146,6 @@ public class ChatClient extends JFrame {
 		try {
 			connect();
 		} catch (IOException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 //		Socket s = new Socket()
