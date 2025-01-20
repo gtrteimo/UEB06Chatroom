@@ -13,6 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -30,25 +31,18 @@ import javax.swing.SwingConstants;
 
 @SuppressWarnings("serial")
 public class ChatClient extends JFrame {
-	private final static Color colours[][] = {
-        {
-            new Color(50, 50, 75),
-            new Color(171, 181, 216),
-            new Color(225, 225, 225),
-            new Color(11, 9, 10),
-            new Color(111, 116, 146)
-        }
-    };
+	private final static Color colours[][] = { { new Color(50, 50, 75), new Color(171, 181, 216),
+			new Color(225, 225, 225), new Color(11, 9, 10), new Color(111, 116, 146) } };
 	public final int CLIENT_ID = 0;
-	
+
 	public static final int DEFAULT_PORT = 65535;
 	public static final String DEFAULT_IP = "localhost";
 	public static final String DEFAULT_USERNAME = "User-";
-	
+
 	private int port = DEFAULT_PORT;
 	private String ip = DEFAULT_IP;
 	private String username;
-	
+
 	private ChatLogin login;
 
 	Container contentPane;
@@ -59,19 +53,19 @@ public class ChatClient extends JFrame {
 	JEditorPane textArea;
 	JEditorPane textField;
 	JButton button;
-	
+
 	private Socket client;
-	
+
 	private BufferedReader in;
 	private PrintStream out;
-	
+
 	private Scanner consoleIn;
-	
+
 	private ChatClientThread thread;
-	
-	public ChatClient () {
+
+	public ChatClient() {
 		super();
-		
+
 		setBounds(25, 25, 1080, 720);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -133,16 +127,16 @@ public class ChatClient extends JFrame {
 		scrollPane2.setViewportView(textField);
 
 		scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    
-	    scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		
-	    button.addActionListener(e -> send());
-	    
+
+		scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+
+		button.addActionListener(e -> send());
+
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
 		contentPane.add(button);
-		
+
 		try {
 			connect();
 		} catch (IOException e1) {
@@ -150,27 +144,29 @@ public class ChatClient extends JFrame {
 		}
 //		Socket s = new Socket()
 	}
-	
-	public void connect () throws UnknownHostException, IOException {
+
+	public void connect() throws UnknownHostException, IOException {
 		client = null;
+		System.out.println(ip.replaceAll(".", ""));
+		try {
 			client = new Socket(ip.replaceAll(".", ""), port);
-			in = new BufferedReader( new InputStreamReader(client.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			out = new PrintStream(client.getOutputStream());
-			
-			
-			
 			out.println(username);
-			
 			thread = new ChatClientThread(in);
-			//thread.start();
-			
+		}catch (ConnectException e) {
+			JOptionPane.showMessageDialog(null, "Server is Offline", "Warning", JOptionPane.WARNING_MESSAGE);
+		}
+
+		// thread.start();
+
 //		CLIENT_ID = ClientIDCounter++;
 		if (username == null) {
 			username = DEFAULT_USERNAME + CLIENT_ID;
 		}
 	}
-	
-	private void send () {
+
+	private void send() {
 		try {
 			String textNew = textField.getText().trim().replaceAll("\n", "");
 			if (!textNew.isEmpty()) {
@@ -242,22 +238,25 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						ip = textFieldIP.getText().isEmpty()?ip:textFieldIP.getText();
+						ip = textFieldIP.getText().isEmpty() ? ip : textFieldIP.getText();
 						port = Integer.valueOf(textFieldPort.getText());
 						username = textFieldUsername.getText();
 						connect();
 					} catch (UnknownHostException e1) {
 						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
 					} catch (IOException e2) {
-						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning",
+								JOptionPane.WARNING_MESSAGE);
 						e2.printStackTrace();
-					}finally {
+					} finally {
 						try {
 							owner.client.close();
 						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning", JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning",
+									JOptionPane.WARNING_MESSAGE);
 							System.exit(0);
-						} catch (NullPointerException e3) {}
+						} catch (NullPointerException e3) {
+						}
 					}
 				}
 			});
