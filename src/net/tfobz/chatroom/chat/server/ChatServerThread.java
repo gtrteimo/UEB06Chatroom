@@ -7,7 +7,7 @@ import java.io.PrintStream;
 import java.net.Socket;
 import java.util.concurrent.Callable;
 
-public class ChatServerThread implements Callable {
+public class ChatServerThread implements Callable<Integer> {
 		
 	private ChatServer owner;
 	
@@ -26,10 +26,12 @@ public class ChatServerThread implements Callable {
 	}
 	
 	@Override
-	public Object call() throws Exception {
+	public Integer call() throws Exception {
 		try {			
 			name = in.readLine();
 			out.print(ChatServer.clientIDCounter++);
+			
+			owner.outputStreams.add(out);
 			
 			System.out.println(name + " signed in. " + owner.outputStreams.size() + " users");
 			
@@ -40,20 +42,26 @@ public class ChatServerThread implements Callable {
 			readInput();
 			
 			signOut();
+			
 		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
-			e.printStackTrace();
-			if (out != null)
-				owner.outputStreams.remove(out);
+//			System.out.println(e.getClass().getName() + ": " + e.getMessage());
+			
+//			if (out != null) {
+//				owner.outputStreams.remove(out);
+//			}
+			
+			signOut();
+			
 		} finally {
 			try { client.close(); } catch (Exception e1) { ; }
 		}		
-		return null;
+		return 0;
 	}
 	
 	private void readInput () throws IOException {
 		String line = in.readLine();
 		while (line != null && !line.isEmpty()) {
+			System.out.println(name + ": " + line);
 			if (line.charAt(0) != '/') {
 				for (PrintStream outs: owner.outputStreams) {
 					outs.println(name + ": " + line);
@@ -66,8 +74,8 @@ public class ChatServerThread implements Callable {
 	}
 	
 	private void signOut () {
-		owner.outputStreams.remove(out);
 		System.out.println(name + " signed out. " + owner.outputStreams.size() + " users");
+		
 		for (PrintStream outs: owner.outputStreams) {
 			outs.println(name + " signed out");
 		}

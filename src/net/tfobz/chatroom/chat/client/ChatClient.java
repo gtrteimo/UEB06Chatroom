@@ -141,14 +141,24 @@ public class ChatClient extends JFrame {
 	    
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
-		contentPane.add(button);		
+		contentPane.add(button);
+		
+		try {
+			connect();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+//		Socket s = new Socket()
 	}
 	
 	public void connect () throws UnknownHostException, IOException {
 		client = null;
-			client = new Socket(ip, port);
+			client = new Socket(ip.replaceAll(".", ""), port);
 			in = new BufferedReader( new InputStreamReader(client.getInputStream()));
 			out = new PrintStream(client.getOutputStream());
+			
+			
 			
 			out.println(username);
 			
@@ -181,8 +191,8 @@ public class ChatClient extends JFrame {
 	public static void main(String[] args) {
 		ChatClient c = new ChatClient();
 		c.setVisible(true);
-		c.login = c.new ChatLogin(c);
-		c.login.setVisible(true);
+//		c.login = c.new ChatLogin(c);
+//		c.login.setVisible(true);
 	}
 
 	@SuppressWarnings("serial")
@@ -233,7 +243,7 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						ip = textFieldIP.getText();
+						ip = textFieldIP.getText().isEmpty()?ip:textFieldIP.getText();
 						port = Integer.valueOf(textFieldPort.getText());
 						username = textFieldUsername.getText();
 						connect();
@@ -241,13 +251,14 @@ public class ChatClient extends JFrame {
 						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
 					} catch (IOException e2) {
 						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning", JOptionPane.WARNING_MESSAGE);
+						e2.printStackTrace();
 					}finally {
 						try {
 							owner.client.close();
 						} catch (IOException e1) {
 							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning", JOptionPane.WARNING_MESSAGE);
 							System.exit(0);
-						}
+						} catch (NullPointerException e3) {}
 					}
 				}
 			});

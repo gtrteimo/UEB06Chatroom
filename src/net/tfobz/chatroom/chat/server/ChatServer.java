@@ -8,8 +8,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.sun.media.sound.FFT;
 
 public class ChatServer {
 	
@@ -41,16 +44,19 @@ public class ChatServer {
 				int input = 0;
 				while (input < 1025 || input > 65535) {
 					System.out.print("Geben sie den Port an auf dem der Server laufen soll (1025-65535): ");
-					input = consoleIn.nextInt();
+					input = Integer.parseInt(consoleIn.next().trim().replaceAll("\n", ""));
 				}
 				server = new ServerSocket(port);
 				System.out.println("Chat server started");
 				repeat = false;
-			} catch (InputMismatchException e) {
-				System.err.println("Port has to be an Integer!");
+			} catch (NoSuchElementException e) {
+				try {server.close();} catch (Exception e2) {}
+				System.exit(0);
+			} catch (NumberFormatException e) {
+				System.out.println("Port has to be an Integer!"); 
 			} catch (IOException e) {
-				System.err.println(e.getMessage());
-				try {server.close();} catch (IOException e2) {}
+				System.out.println(e.getMessage());
+				try {server.close();} catch (Exception e2) {}
 			}
 		}
 	}
@@ -59,28 +65,14 @@ public class ChatServer {
 		try {
 			while (true) {
 				Socket client = server.accept();
-//				BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-				PrintStream out = new PrintStream(client.getOutputStream());
-				
-//				clients.add(client);
-//				inputStreams.add(in);
-				outputStreams.add(out);
-				
-				executer.submit(this, new ChatServerThread(client));
+								
+				executer.submit(new ChatServerThread(this, client));
 			}
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 		} finally {
 			try { server.close(); } catch (Exception e1) { ; }
 		}
-	}
-	
-	private void execute (Socket client) {
-		BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-
-		
-		String name = in.readLine();
-		System.out.println(name + " signed in. " + ChatServer.outputStreams.size() + " users");
 	}
 	
 	public static void main(String[] args) {

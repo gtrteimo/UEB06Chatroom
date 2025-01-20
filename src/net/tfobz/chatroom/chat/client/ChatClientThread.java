@@ -3,9 +3,9 @@ package net.tfobz.chatroom.chat.client;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.SocketException;
+import java.util.concurrent.Callable;
 
-public class ChatClientThread extends Thread
-{
+public class ChatClientThread implements Callable<Integer> {
 	private BufferedReader in = null;
 	
 	public ChatClientThread(BufferedReader in) {
@@ -13,7 +13,7 @@ public class ChatClientThread extends Thread
 	}
 	
 	@Override
-	public void run() {
+	public Integer call () throws Exception {
 		try {
 			while (true) {
 				String line = in.readLine();
@@ -24,5 +24,6 @@ public class ChatClientThread extends Thread
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 		}
+		return 0;
 	}
 }
