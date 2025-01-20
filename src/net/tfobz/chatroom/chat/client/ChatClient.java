@@ -294,6 +294,7 @@ public class ChatClient extends JFrame {
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
+			textFieldIP.setText("localhost");
 			textFieldIP.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
 					JTextField c = (JTextField) getFocusOwner();
