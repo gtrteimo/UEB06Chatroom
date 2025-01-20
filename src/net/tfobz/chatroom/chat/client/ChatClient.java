@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -43,11 +44,11 @@ public class ChatClient extends JFrame {
 	public static final int DEFAULT_PORT = 65535;
 	public static final String DEFAULT_IP = "localhost";
 	public static final String DEFAULT_USERNAME = "User-";
-	
+
 	private int port = DEFAULT_PORT;
 	private String ip = DEFAULT_IP;
 	private String username;
-	
+
 	private ChatLogin login;
 
 	Container contentPane;
@@ -58,12 +59,12 @@ public class ChatClient extends JFrame {
 	JEditorPane textArea;
 	JEditorPane textField;
 	JButton button;
-	
+
 	private Socket client;
-	
+
 	private BufferedReader in;
 	private PrintStream out;
-	
+
 	private Scanner consoleIn;
 	
 	private ExecutorService executer;
@@ -134,12 +135,12 @@ public class ChatClient extends JFrame {
 		scrollPane2.setViewportView(textField);
 
 		scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    
-	    scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-	    scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		
-	    button.addActionListener(e -> send());
-	    
+
+		scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+
+		button.addActionListener(e -> send());
+
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
 		contentPane.add(button);
@@ -158,19 +159,21 @@ public class ChatClient extends JFrame {
 			e1.printStackTrace();
 		}
 	}
-	
-	public void connect () throws UnknownHostException, IOException {
+
+	public void connect() throws UnknownHostException, IOException {
 		client = null;
+		System.out.println(ip.replaceAll(".", ""));
+		try {
 			client = new Socket(ip.replaceAll(".", ""), port);
-			in = new BufferedReader( new InputStreamReader(client.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			out = new PrintStream(client.getOutputStream());
 			
 			out.println(username);
 			
 			executer.submit(new ChatClientThread(in, textArea));
 	}
-	
-	private void send () {
+
+	private void send() {
 		try {
 			String textNew = textField.getText().trim().replaceAll("\n", "");
 			if (!textNew.isEmpty()) {
@@ -240,22 +243,25 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						ip = textFieldIP.getText().isEmpty()?ip:textFieldIP.getText();
+						ip = textFieldIP.getText().isEmpty() ? ip : textFieldIP.getText();
 						port = Integer.valueOf(textFieldPort.getText());
 						username = textFieldUsername.getText();
 						connect();
 					} catch (UnknownHostException e1) {
 						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
 					} catch (IOException e2) {
-						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning", JOptionPane.WARNING_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning",
+								JOptionPane.WARNING_MESSAGE);
 						e2.printStackTrace();
-					}finally {
+					} finally {
 						try {
 							owner.client.close();
 						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning", JOptionPane.WARNING_MESSAGE);
+							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning",
+									JOptionPane.WARNING_MESSAGE);
 							System.exit(0);
-						} catch (NullPointerException e3) {}
+						} catch (NullPointerException e3) {
+						}
 					}
 				}
 			});
