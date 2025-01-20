@@ -16,9 +16,13 @@ import com.sun.media.sound.FFT;
 
 public class ChatServer {
 	
+	public static int serverIDCounter = 0;
+		
 	public static int clientIDCounter = 0;
 	
 	private static final int MAX_CLIENTS = 50;
+	
+	private final int SERVER_ID;
 	
 	public static final int DEFAULT_PORT = 65535;
 	private int port = DEFAULT_PORT;
@@ -29,13 +33,10 @@ public class ChatServer {
 	
 	private ExecutorService executer;
 	
-//	private ArrayList<Socket> clients = new ArrayList<Socket>();
-//	private ArrayList<BufferedReader> inputStreams = new ArrayList<BufferedReader>();
 	ArrayList<PrintStream> outputStreams = new ArrayList<PrintStream>();
 
 	
 	public ChatServer () {
-		
 		executer = Executors.newCachedThreadPool();
 		consoleIn = new Scanner(System.in);
 		boolean repeat = true;
@@ -59,6 +60,7 @@ public class ChatServer {
 				try {server.close();} catch (Exception e2) {}
 			}
 		}
+		SERVER_ID = serverIDCounter++;
 	}
 	
 	private void accept () {
