@@ -163,7 +163,7 @@ public class ChatClient extends JFrame {
 			out.println(username);
 			
 			thread = new ChatClientThread(in);
-			thread.start();
+			//thread.start();
 			
 //		CLIENT_ID = ClientIDCounter++;
 		if (username == null) {
@@ -191,8 +191,8 @@ public class ChatClient extends JFrame {
 	public static void main(String[] args) {
 		ChatClient c = new ChatClient();
 		c.setVisible(true);
-//		c.login = c.new ChatLogin(c);
-//		c.login.setVisible(true);
+		c.login = c.new ChatLogin(c);
+		c.login.setVisible(true);
 	}
 
 	@SuppressWarnings("serial")
@@ -297,6 +297,7 @@ public class ChatClient extends JFrame {
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
+			textFieldIP.setText("localhost");
 			textFieldIP.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
 					JTextField c = (JTextField) getFocusOwner();
