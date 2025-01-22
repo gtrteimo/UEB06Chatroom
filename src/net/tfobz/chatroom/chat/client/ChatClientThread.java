@@ -22,6 +22,7 @@ public class ChatClientThread implements Callable<Integer> {
 	public Integer call () throws Exception {
 		try {
 			while (true) {
+				System.out.println("Client");
 				String line = in.readLine();
 				EventQueue.invokeLater(() -> {
 					textArea.setText("Hallo Welt");
