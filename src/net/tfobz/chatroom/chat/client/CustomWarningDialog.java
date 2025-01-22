@@ -10,37 +10,42 @@ public class CustomWarningDialog extends JDialog {
 		setSize(400, 200);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		getContentPane().setLayout(null);
 
 		JPanel panel = new JPanel();
-		panel.setLayout(new BorderLayout(10, 10));
-
+		panel.setLayout(null);
+		
 		JLabel iconLabel = new JLabel();
-
+		iconLabel.setBounds(50,50,60,60);
 		try {
 			iconLabel.setIcon(new ImageIcon(getClass().getResource("/icons/warningIco.png")));
 		} catch (NullPointerException e) {
 			System.out.println("Error: Couldnt find Image (warningIco)");
 		}
-		panel.add(iconLabel, BorderLayout.WEST);
+		
+		panel.add(iconLabel);
 
 		JLabel messageLabel = new JLabel(message);
 		messageLabel.setFont(new Font("Arial", Font.PLAIN, 26));
 		messageLabel.setForeground(Color.black);
-		panel.add(messageLabel, BorderLayout.CENTER);
+		messageLabel.setBounds(0,0,50,50);
+		panel.add(messageLabel);
 
 		JButton okButton = new JButton("OK");
 		okButton.setFont(new Font("Arial", Font.PLAIN, 14));
 		okButton.setForeground(Color.black);
 		okButton.setFocusPainted(false);
 		okButton.setBorderPainted(false);
+		okButton.setBounds(0,50,50,50);
 		okButton.addActionListener(e -> dispose());
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setBackground(new Color(192, 192, 192));
+		buttonPanel.setBounds(0,126,384,35);
 		buttonPanel.add(okButton);
 
-		getContentPane().add(panel, BorderLayout.CENTER);
-		getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+		getContentPane().add(panel);
+		getContentPane().add(buttonPanel);
 	}
 
 	public static void showWarning(String message) {
