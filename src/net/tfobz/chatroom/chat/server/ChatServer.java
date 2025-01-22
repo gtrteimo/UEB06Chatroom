@@ -23,7 +23,7 @@ public class ChatServer {
 	
 	private final int SERVER_ID;
 	
-	public static final int DEFAULT_PORT = 65535;
+	public static final int DEFAULT_PORT = 10000;
 	private int port = DEFAULT_PORT;
 	
 	private Scanner consoleIn;
@@ -65,8 +65,9 @@ public class ChatServer {
 	private void accept () {
 		try {
 			while (true) {
-				Socket client = server.accept();								
-				executer.submit(new ChatServerThread(this, client));
+				Socket client = server.accept();	
+				ChatServerThread t = new ChatServerThread(this, client);
+				executer.submit(t);
 			}
 		} catch (IOException e) {
 			System.out.println(e.getClass().getName() + ": " + e.getMessage());

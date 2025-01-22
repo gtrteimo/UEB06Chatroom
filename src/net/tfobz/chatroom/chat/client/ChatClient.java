@@ -41,7 +41,7 @@ public class ChatClient extends JFrame {
     };
 	protected int CLIENT_ID;
 	
-	public static final int DEFAULT_PORT = 65535;
+	public static final int DEFAULT_PORT = 10000;
 	public static final String DEFAULT_IP = "localhost";
 	public static final String DEFAULT_USERNAME = "User-";
 
@@ -157,8 +157,8 @@ public class ChatClient extends JFrame {
 		
 		try {
 			CLIENT_ID = Integer.parseInt(in.readLine());
-			if (username == null) {
-				username = DEFAULT_USERNAME + CLIENT_ID;
+			if (username == null || username.trim().replaceAll("\n", "").isEmpty()) {
+				username = in.readLine();
 			}
 		} catch (NumberFormatException e1) {
 			e1.printStackTrace();
@@ -252,6 +252,7 @@ public class ChatClient extends JFrame {
 							port = Integer.valueOf(textFieldPort.getText());
 						}
 						username = textFieldUsername.getText();
+						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						connect();
 					} catch (UnknownHostException e1) {
 						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
@@ -267,6 +268,7 @@ public class ChatClient extends JFrame {
 									JOptionPane.WARNING_MESSAGE);
 							System.exit(0);
 						} catch (NullPointerException e3) {
+							e3.printStackTrace();
 						}
 					}
 				}

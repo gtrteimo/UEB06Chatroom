@@ -8,7 +8,11 @@ import java.net.Socket;
 import java.util.concurrent.Callable;
 
 public class ChatServerThread implements Callable<Integer> {
-		
+	
+	private static int ClientIDCounter = 0;
+	
+	public final int CLIENT_ID;
+	
 	private ChatServer owner;
 	
 	private Socket client;
@@ -19,6 +23,7 @@ public class ChatServerThread implements Callable<Integer> {
 	private String name;
 	
 	public ChatServerThread(ChatServer owner, Socket client) throws IOException {
+		CLIENT_ID = ClientIDCounter++;
 		this.owner = owner;
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -30,6 +35,11 @@ public class ChatServerThread implements Callable<Integer> {
 		try {			
 			name = in.readLine();
 			out.print(ChatServer.clientIDCounter++);
+			if (name.trim().replaceAll("\n", "").isEmpty()) {
+				name = "User-"+CLIENT_ID;
+				out.print(name);
+			}
+			
 			owner.outputStreams.add(out);
 			
 			System.out.println(name + " signed in. " + owner.outputStreams.size() + " users");
@@ -48,7 +58,7 @@ public class ChatServerThread implements Callable<Integer> {
 //			if (out != null) {
 //				owner.outputStreams.remove(out);
 //			}
-			
+			System.out.println("IOException: "+ e.getMessage());
 			signOut();
 			
 		} finally {
