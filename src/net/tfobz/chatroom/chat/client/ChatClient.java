@@ -147,6 +147,13 @@ public class ChatClient extends JFrame {
 		
 		login = new ChatLogin(this);
 		login.setVisible(true);
+	}
+
+	public void connect() throws UnknownHostException, IOException {
+		client = null;
+		client = new Socket(ip, port);
+		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+		out = new PrintStream(client.getOutputStream());
 		
 		try {
 			CLIENT_ID = Integer.parseInt(in.readLine());
@@ -158,19 +165,10 @@ public class ChatClient extends JFrame {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-	}
-
-	public void connect() throws UnknownHostException, IOException {
-		client = null;
-		System.out.println(ip.replaceAll(".", ""));
-		try {
-			client = new Socket(ip.replaceAll(".", ""), port);
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			out = new PrintStream(client.getOutputStream());
-			
-			out.println(username);
-			
-			executer.submit(new ChatClientThread(in, textArea));
+		
+		out.println(username);
+		
+		executer.submit(new ChatClientThread(in, textArea));
 	}
 
 	private void send() {
@@ -243,8 +241,16 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						ip = textFieldIP.getText().isEmpty() ? ip : textFieldIP.getText();
-						port = Integer.valueOf(textFieldPort.getText());
+						if (!textFieldPort.getText().trim().replaceAll("\n", "").replaceAll(".", "").isEmpty()) {						
+							ip = textFieldIP.getText().trim().replaceAll("\n", "").replaceAll(".", "");
+							System.out.println("IP 1: "+ip);
+						} 
+						System.out.println("IP 2: "+ip);
+						if (textFieldPort.getText().trim().replaceAll("\n", "").isEmpty()) {
+							port = DEFAULT_PORT;
+						} else {
+							port = Integer.valueOf(textFieldPort.getText());
+						}
 						username = textFieldUsername.getText();
 						connect();
 					} catch (UnknownHostException e1) {
@@ -300,7 +306,7 @@ public class ChatClient extends JFrame {
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
-			textFieldIP.setText("localhost");
+			textFieldIP.setText(DEFAULT_IP);
 			textFieldIP.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
 					JTextField c = (JTextField) getFocusOwner();

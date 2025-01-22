@@ -24,6 +24,7 @@ public class ChatClientThread implements Callable<Integer> {
 			while (true) {
 				String line = in.readLine();
 				EventQueue.invokeLater(() -> {
+					textArea.setText("Hallo Welt");
 					textArea.setText(textArea.getText() + "\n" + line);
 					
 				});

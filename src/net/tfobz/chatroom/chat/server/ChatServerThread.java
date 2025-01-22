@@ -30,7 +30,6 @@ public class ChatServerThread implements Callable<Integer> {
 		try {			
 			name = in.readLine();
 			out.print(ChatServer.clientIDCounter++);
-			
 			owner.outputStreams.add(out);
 			
 			System.out.println(name + " signed in. " + owner.outputStreams.size() + " users");
