@@ -23,7 +23,6 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -255,17 +254,15 @@ public class ChatClient extends JFrame {
 						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						connect();
 					} catch (UnknownHostException e1) {
-						JOptionPane.showMessageDialog(null, "Wrong Values!", "Warning", JOptionPane.WARNING_MESSAGE);
+						new CustomWarningDialog("Wrong Values!");
 					} catch (IOException e2) {
-						JOptionPane.showMessageDialog(null, "Could't connect to server!", "Warning",
-								JOptionPane.WARNING_MESSAGE);
+						new CustomWarningDialog("Could'nt connect to Server!");
 						e2.printStackTrace();
 					} finally {
 						try {
 							owner.client.close();
 						} catch (IOException e1) {
-							JOptionPane.showMessageDialog(null, "Critial Issue, software will now close!", "Warning",
-									JOptionPane.WARNING_MESSAGE);
+							new CustomWarningDialog("Critical issue, software will now close!");
 							System.exit(0);
 						} catch (NullPointerException e3) {
 							e3.printStackTrace();
