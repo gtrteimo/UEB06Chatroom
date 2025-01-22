@@ -29,8 +29,10 @@ public class ChatServerThread implements Callable<Integer> {
 	
 	@Override
 	public Integer call() throws Exception {
-		try {			
-			name = in.readLine();
+		try {
+			int rndm = (int)(Math.random()*24)+12;
+			String rndmColor = "\u001B["+rndm+"m";
+			name = rndmColor+in.readLine();
 			out.print(ChatServer.clientIDCounter++);
 			if (name.trim().replaceAll("\n", "").isEmpty()) {
 				name = "User-"+CLIENT_ID;
