@@ -10,12 +10,9 @@ import java.util.concurrent.Callable;
 public class ChatServerThread implements Callable<Integer> {
 		
 	private ChatServer owner;
-	
 	private Socket client;
-	
 	private BufferedReader in;
 	private PrintStream out;
-	
 	private String name;
 	
 	public ChatServerThread(ChatServer owner, Socket client) throws IOException {
@@ -57,19 +54,19 @@ public class ChatServerThread implements Callable<Integer> {
 		return 0;
 	}
 	
-	private void readInput () throws IOException {
-		String line = in.readLine();
-		while (line != null && !line.isEmpty()) {
-			System.out.println(name + ": " + line);
-			if (line.charAt(0) != '/') {
-				for (PrintStream outs: owner.outputStreams) {
-					outs.println(name + ": " + line);
-				}
-			} else {
-				command(line.substring(1));
-			}
-			line = in.readLine();
-		}
+	private void readInput() throws IOException {
+	    String line = in.readLine();
+	    while (line != null && !line.isEmpty()) {
+	        System.out.println(name + ": " + line);
+	        if (line.charAt(0) != '/') {
+	            for (PrintStream outs : owner.outputStreams) {
+	                outs.println(name + ": " + line);
+	            }
+	        } else {
+	            command(line.substring(1));
+	        }
+	        line = in.readLine();
+	    }
 	}
 	
 	private void signOut () {

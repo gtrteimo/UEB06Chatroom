@@ -7,7 +7,9 @@ import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -20,7 +22,6 @@ public class ChatServer {
 	public static int clientIDCounter = 0;
 	
 	private static final int MAX_CLIENTS = 50;
-	
 	private final int SERVER_ID;
 	
 	public static final int DEFAULT_PORT = 65535;
