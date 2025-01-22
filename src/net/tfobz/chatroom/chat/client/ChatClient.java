@@ -5,8 +5,6 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -17,6 +15,8 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -25,16 +25,22 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 @SuppressWarnings("serial")
-public class ChatClient extends JFrame {
-	private final static Color colours[][] = { { new Color(50, 50, 75), new Color(171, 181, 216),
-			new Color(225, 225, 225), new Color(11, 9, 10), new Color(111, 116, 146) } };
-	public final int CLIENT_ID = 0;
-
+public class ChatClient extends JFrame {	
+	private final static Color colours[][] = {
+        {
+            new Color(50, 50, 75),
+            new Color(171, 181, 216),
+            new Color(225, 225, 225),
+            new Color(11, 9, 10),
+            new Color(111, 116, 146)
+        }
+    };
+	protected int CLIENT_ID;
+	
 	public static final int DEFAULT_PORT = 65535;
 	public static final String DEFAULT_IP = "localhost";
 	public static final String DEFAULT_USERNAME = "User-";
@@ -60,12 +66,14 @@ public class ChatClient extends JFrame {
 	private PrintStream out;
 
 	private Scanner consoleIn;
-
-	private ChatClientThread thread;
-
-	public ChatClient() {
+	
+	private ExecutorService executer;
+	
+	public ChatClient () {
 		super();
-
+		
+		executer = Executors.newSingleThreadExecutor();
+		
 		setBounds(25, 25, 1080, 720);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -136,34 +144,31 @@ public class ChatClient extends JFrame {
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
 		contentPane.add(button);
-
-		try {
-			connect();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-//		Socket s = new Socket()
+		
+		login = new ChatLogin(this);
+		login.setVisible(true);
 	}
 
 	public void connect() throws UnknownHostException, IOException {
 		client = null;
-		System.out.println(ip.replaceAll(".", ""));
+		client = new Socket(ip, port);
+		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+		out = new PrintStream(client.getOutputStream());
+		
 		try {
-			client = new Socket(ip.replaceAll(".", ""), port);
-			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-			out = new PrintStream(client.getOutputStream());
-			out.println(username);
-			thread = new ChatClientThread(in);
-		}catch (ConnectException e) {
-			JOptionPane.showMessageDialog(null, "Server is Offline", "Warning", JOptionPane.WARNING_MESSAGE);
+			CLIENT_ID = Integer.parseInt(in.readLine());
+			if (username == null) {
+				username = DEFAULT_USERNAME + CLIENT_ID;
+			}
+		} catch (NumberFormatException e1) {
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			e1.printStackTrace();
 		}
-
-		// thread.start();
-
-//		CLIENT_ID = ClientIDCounter++;
-		if (username == null) {
-			username = DEFAULT_USERNAME + CLIENT_ID;
-		}
+		
+		out.println(username);
+		
+		executer.submit(new ChatClientThread(in, textArea));
 	}
 
 	private void send() {
@@ -186,8 +191,6 @@ public class ChatClient extends JFrame {
 	public static void main(String[] args) {
 		ChatClient c = new ChatClient();
 		c.setVisible(true);
-		c.login = c.new ChatLogin(c);
-		c.login.setVisible(true);
 	}
 
 	@SuppressWarnings("serial")
@@ -238,8 +241,16 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						ip = textFieldIP.getText().isEmpty() ? ip : textFieldIP.getText();
-						port = Integer.valueOf(textFieldPort.getText());
+						if (!textFieldPort.getText().trim().replaceAll("\n", "").replaceAll(".", "").isEmpty()) {						
+							ip = textFieldIP.getText().trim().replaceAll("\n", "").replaceAll(".", "");
+							System.out.println("IP 1: "+ip);
+						} 
+						System.out.println("IP 2: "+ip);
+						if (textFieldPort.getText().trim().replaceAll("\n", "").isEmpty()) {
+							port = DEFAULT_PORT;
+						} else {
+							port = Integer.valueOf(textFieldPort.getText());
+						}
 						username = textFieldUsername.getText();
 						connect();
 					} catch (UnknownHostException e1) {
@@ -295,7 +306,7 @@ public class ChatClient extends JFrame {
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
-			textFieldIP.setText("localhost");
+			textFieldIP.setText(DEFAULT_IP);
 			textFieldIP.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
 					JTextField c = (JTextField) getFocusOwner();
