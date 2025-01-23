@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -136,22 +137,21 @@ public class ChatClient extends JFrame {
 		scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
+		textField.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+					send();
+				}
+			}
+		});
+		
 		button.addActionListener(e -> send());
 
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
 		contentPane.add(button);
 		
-		
-//		try {
-//			connect();
-//		} catch (UnknownHostException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		} catch (IOException e1) {
-//			// TODO Auto-generated catch block
-//			e1.printStackTrace();
-//		}
 		login = new ChatLogin(this);
 		login.setVisible(true);
 	}
@@ -171,7 +171,7 @@ public class ChatClient extends JFrame {
 	        e1.printStackTrace();
 	    }
 	    
-	    if (username.trim().replaceAll("\n", "").isEmpty()) {
+	    if (username.equals(DEFAULT_USERNAME)) {
 	    	username = "User-" + CLIENT_ID;
         }
 	    
@@ -190,7 +190,6 @@ public class ChatClient extends JFrame {
 				if (!textOld.isEmpty()) {
 					textOld += "\n";
 				}
-//				textArea.setText(textOld + username + ": " + textNew);
 				out.println(textNew);
 			}
 			textField.setText("");
@@ -254,32 +253,21 @@ public class ChatClient extends JFrame {
 					try {
 						if (!textFieldPort.getText().trim().replaceAll("\n", "").replaceAll(".", "").isEmpty()) {						
 							ip = textFieldIP.getText().trim().replaceAll("\n", "").replaceAll(".", "");
-							System.out.println("IP 1: "+ip);
 						} 
-						System.out.println("IP 2: "+ip);
 						if (textFieldPort.getText().trim().replaceAll("\n", "").isEmpty()) {
 							port = DEFAULT_PORT;
 						} else {
 							port = Integer.valueOf(textFieldPort.getText());
 						}
 						username = textFieldUsername.getText();
-						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
+//						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						connect();
-						System.out.println("Connect end end");
-					} catch (UnknownHostException e1) {
+						setVisible(false);
+					} catch (UnknownHostException ex) {
 						new CustomWarningDialog("Wrong Values!");
-					} catch (IOException e2) {
+					} catch (IOException ex) {
 						new CustomWarningDialog("Could'nt connect to Server!");
-						e2.printStackTrace();
-					} finally {
-						try {
-							owner.client.close();
-						} catch (IOException e1) {
-							new CustomWarningDialog("Critical issue, software will now close!");
-							System.exit(0);
-						} catch (NullPointerException e3) {
-							e3.printStackTrace();
-						}
+						ex.printStackTrace();
 					}
 				}
 			});

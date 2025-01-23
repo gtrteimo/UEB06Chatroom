@@ -24,15 +24,22 @@ public class ChatClientThread implements Callable<Integer> {
 			while (true) {
 				System.out.println("Client");
 				String line = in.readLine();
-				EventQueue.invokeLater(() -> {
-					textArea.setText("Hallo Welt");
-					textArea.setText(textArea.getText() + "\n" + line);
-					
-				});
+				if (textArea.getText() != null && !textArea.getText().isEmpty()) {
+					final String text = textArea.getText() + "\n";
+					EventQueue.invokeLater(() -> {
+						textArea.setText(text + line);
+					});
+				} else {
+					EventQueue.invokeLater(() -> {
+						textArea.setText(line);
+					});
+				}
+				
+				
 				System.out.println(line);
 			}
 		} catch (SocketException e) {
-			System.out.println("Connection to ChatServer lost");
+			System.out.println("Connection to ChatSertry { server.close(); } catch (Exception e1) { ; }ver lost");
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

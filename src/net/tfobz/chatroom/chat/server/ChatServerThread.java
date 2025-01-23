@@ -32,8 +32,8 @@ public class ChatServerThread implements Callable<Integer> {
 	    try {
 	        out.println(CLIENT_ID);
 
-			int rndm = (int)(Math.random()*24)+12;
-			String rndmColor = "\u001B["+rndm+"m";
+//			int rndm = (int)(Math.random()*24)+12;
+			String rndmColor = "";//"\u001B["+rndm+"m";
 	        username = rndmColor + in.readLine(); 
 	        
 	        owner.outputStreams.add(out);
@@ -49,7 +49,7 @@ public class ChatServerThread implements Callable<Integer> {
 	        signOut();
 
 	    } catch (IOException e) {
-	        e.printStackTrace();
+//	        e.printStackTrace();
 	        signOut();
 
 	    } finally {

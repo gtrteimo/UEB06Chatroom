@@ -51,11 +51,13 @@ public class ChatServer {
 				System.out.println("Chat server started");
 				repeat = false;
 			} catch (NoSuchElementException e) {
+				e.printStackTrace();
 				try {server.close();} catch (Exception e2) {}
 				System.exit(0);
 			} catch (NumberFormatException e) {
 				System.out.println("Port has to be an Integer!"); 
 			} catch (IOException e) {
+				e.printStackTrace();
 				System.out.println(e.getMessage());
 				try {server.close();} catch (Exception e2) {}
 			}
@@ -71,11 +73,9 @@ public class ChatServer {
 				executer.submit(t);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-//			System.out.println(e.getClass().getName() + ": " + e.getMessage());
-		} finally {
 			try { server.close(); } catch (Exception e1) { ; }
-		}
+			e.printStackTrace();
+		} 
 	}
 	
 	public static void main(String[] args) {
