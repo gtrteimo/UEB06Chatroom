@@ -32,7 +32,9 @@ public class ChatServerThread implements Callable<Integer> {
 	    try {
 	        out.println(CLIENT_ID);
 
-	        username = in.readLine(); 
+			int rndm = (int)(Math.random()*24)+12;
+			String rndmColor = "\u001B["+rndm+"m";
+	        username = rndmColor + in.readLine(); 
 	        
 	        owner.outputStreams.add(out);
 
