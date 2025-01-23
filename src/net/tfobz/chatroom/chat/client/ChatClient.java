@@ -7,14 +7,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -46,7 +46,7 @@ public class ChatClient extends JFrame {
 
 	private int port = DEFAULT_PORT;
 	private String ip = DEFAULT_IP;
-	private String username;
+	private String username = "";
 
 	private ChatLogin login;
 
@@ -63,8 +63,6 @@ public class ChatClient extends JFrame {
 
 	private BufferedReader in;
 	private PrintStream out;
-
-	private Scanner consoleIn;
 	
 	private ExecutorService executer;
 	
@@ -144,30 +142,44 @@ public class ChatClient extends JFrame {
 		contentPane.add(scrollPane2);
 		contentPane.add(button);
 		
+		
+//		try {
+//			connect();
+//		} catch (UnknownHostException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
 		login = new ChatLogin(this);
 		login.setVisible(true);
 	}
 
 	public void connect() throws UnknownHostException, IOException {
-		client = null;
-		client = new Socket(ip, port);
-		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-		out = new PrintStream(client.getOutputStream());
-		
-		try {
-			CLIENT_ID = Integer.parseInt(in.readLine());
-			if (username == null || username.trim().replaceAll("\n", "").isEmpty()) {
-				username = in.readLine();
-			}
-		} catch (NumberFormatException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		
-		out.println(username);
-		
-		executer.submit(new ChatClientThread(in, textArea));
+	    client = new Socket(ip, port);
+
+	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+	    out = new PrintStream(client.getOutputStream());
+
+	    try {
+	        CLIENT_ID = Integer.parseInt(in.readLine()); // Receive ID FIRST
+
+	    } catch (NumberFormatException e1) {
+	        e1.printStackTrace();
+	    } catch (IOException e1) {
+	        e1.printStackTrace();
+	    }
+	    
+	    if (username.trim().replaceAll("\n", "").isEmpty()) {
+	    	username = "User-" + CLIENT_ID;
+        }
+	    
+	    out.println(username);
+
+	    System.out.println("Connect end");
+
+	    executer.submit(new ChatClientThread(in, textArea));
 	}
 
 	private void send() {
@@ -209,9 +221,9 @@ public class ChatClient extends JFrame {
 		public ChatLogin(ChatClient owner) {
 			super(owner, "Log In", true);
 			setResizable(false);
-			setDefaultCloseOperation(HIDE_ON_CLOSE);
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 			setBounds(owner.getX(), owner.getY(), 1080, 720);
-
+			
 			contentPane = getContentPane();
 			contentPane.setLayout(null);
 			contentPane.setBackground(colours[0][1]);
@@ -253,6 +265,7 @@ public class ChatClient extends JFrame {
 						username = textFieldUsername.getText();
 						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						connect();
+						System.out.println("Connect end end");
 					} catch (UnknownHostException e1) {
 						new CustomWarningDialog("Wrong Values!");
 					} catch (IOException e2) {
@@ -275,6 +288,10 @@ public class ChatClient extends JFrame {
 			labelPort.setText("Enter Port: ");
 			labelUsername.setText("Enter Username: ");
 
+			textFieldIP.setText(DEFAULT_IP);
+			textFieldPort.setText(DEFAULT_PORT+"");
+			textFieldUsername.setText(DEFAULT_USERNAME);
+			
 			buttonConnect.setText("Connect");
 
 			labelIP.setBounds(0, 150, 314, 100);
@@ -305,7 +322,6 @@ public class ChatClient extends JFrame {
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
-			textFieldIP.setText(DEFAULT_IP);
 			textFieldIP.addKeyListener(new KeyAdapter() {
 				public void keyPressed(KeyEvent e) {
 					JTextField c = (JTextField) getFocusOwner();

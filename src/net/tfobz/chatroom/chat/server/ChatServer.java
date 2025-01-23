@@ -71,7 +71,8 @@ public class ChatServer {
 				executer.submit(t);
 			}
 		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+//			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 		} finally {
 			try { server.close(); } catch (Exception e1) { ; }
 		}

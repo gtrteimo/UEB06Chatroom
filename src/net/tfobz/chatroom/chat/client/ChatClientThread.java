@@ -33,8 +33,10 @@ public class ChatClientThread implements Callable<Integer> {
 			}
 		} catch (SocketException e) {
 			System.out.println("Connection to ChatServer lost");
+			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println(e.getClass().getName() + ": " + e.getMessage());
+			e.printStackTrace();
+//			System.out.println(e.getClass().getName() + ": " + e.getMessage());
 		}
 		return 0;
 	}
