@@ -43,7 +43,7 @@ public class ChatClient extends JFrame {
 	
 	public static final int DEFAULT_PORT = 10000;
 	public static final String DEFAULT_IP = "localhost";
-	public static final String DEFAULT_USERNAME = "User-";
+	public static final String DEFAULT_USERNAME = "User";
 
 	private int port = DEFAULT_PORT;
 	private String ip = DEFAULT_IP;
@@ -51,14 +51,18 @@ public class ChatClient extends JFrame {
 
 	private ChatLogin login;
 
-	Container contentPane;
+	private Container contentPane;
 
-	JScrollPane scrollPane1;
-	JScrollPane scrollPane2;
+	private JScrollPane scrollPane1;
+	private JScrollPane scrollPane2;
 
-	JEditorPane textArea;
-	JEditorPane textField;
-	JButton button;
+	private JButton newChatroom;
+	private JButton logIn;
+	private JButton exit;
+	
+	private JEditorPane textArea;
+	private JEditorPane textField;
+	private JButton button;
 
 	private Socket client;
 
@@ -69,14 +73,49 @@ public class ChatClient extends JFrame {
 	
 	public ChatClient () {
 		super();
-		
+				
 		executer = Executors.newSingleThreadExecutor();
 		
 		setBounds(25, 25, 1080, 720);
 		setResizable(false);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		setTitle("Chatroom");
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		setTitle("Main Chatroom");
 
+		addWindowListener(new WindowListener() {
+			
+			@Override
+			public void windowClosing(WindowEvent e) {
+				try {
+					logOut();
+					client.close();
+				} catch (NullPointerException | IOException e1) {
+					try {client.close();} catch (Exception e2) {}
+				}
+				setVisible(false);
+				dispose();
+				System.exit(2);
+			}
+			
+			@Override
+			public void windowOpened(WindowEvent e) {}
+			
+			@Override
+			public void windowIconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeiconified(WindowEvent e) {}
+			
+			@Override
+			public void windowDeactivated(WindowEvent e) {}
+			
+			
+			@Override
+			public void windowClosed(WindowEvent e) {}
+			
+			@Override
+			public void windowActivated(WindowEvent e) {}
+		});
+		
 		contentPane = getContentPane();
 		contentPane.setLayout(null);
 		contentPane.setBackground(colours[0][1]);
@@ -87,6 +126,10 @@ public class ChatClient extends JFrame {
 		scrollPane1 = new JScrollPane();
 		scrollPane2 = new JScrollPane();
 
+		newChatroom = new JButton();
+		logIn = new JButton();
+		exit = new JButton();
+		
 		textArea = new JEditorPane() {
 			@Override
 			public boolean getScrollableTracksViewportWidth() {
@@ -101,23 +144,39 @@ public class ChatClient extends JFrame {
 		};
 		button = new JButton();
 
+		newChatroom.setText("New Chatroom");;
+		logIn = new JButton("Log in");
+		exit = new JButton("Exit");
+		
 		textArea.setEditable(false);
 		textField.setEditable(true);
 
 		button.setText("Send");
-
-		scrollPane1.setBounds(10, 10, w - 20, h - 20 - 60);
+		
+		scrollPane1.setBounds(10, 10 + 60, w - 20, h - 20 - 60 - 60);
 		scrollPane2.setBounds(10, h - 60, w - 200, 50);
+		newChatroom.setBounds(10, 10, (w-20-20)/3, 50);
+		logIn.setBounds(1*(w-20)/3 + 15 + 10, 10, (w-20)/3 - 20, 50);
+		exit.setBounds( 2*(w-20)/3 + 10 + 20, 10, (w-20)/3 - 20, 50);
 		button.setBounds(10 + w - 190, h - 60, 170, 50);
 
 		textArea.setFont(new Font("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
 		textField.setFont(new Font("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
+		newChatroom.setFont(new Font("Arial", Font.PLAIN, newChatroom.getHeight() / 2 + 1));
+		logIn.setFont(new Font("Arial", Font.PLAIN, logIn.getHeight() / 2 + 1));
+		exit.setFont(new Font("Arial", Font.PLAIN, exit.getHeight() / 2 + 1));
 		button.setFont(new Font("Arial", Font.PLAIN, button.getHeight() / 2 + 1));
 
 		textArea.setBackground(colours[0][2]);
 		textArea.setForeground(colours[0][3]);
 		textField.setBackground(colours[0][2]);
 		textField.setForeground(colours[0][3]);
+		newChatroom.setBackground(colours[0][4]);
+		newChatroom.setForeground(colours[0][2]);
+		logIn.setBackground(colours[0][4]);
+		logIn.setForeground(colours[0][2]);
+		exit.setBackground(colours[0][4]);
+		exit.setForeground(colours[0][2]);
 		button.setBackground(colours[0][4]);
 		button.setForeground(colours[0][2]);
 
@@ -125,8 +184,14 @@ public class ChatClient extends JFrame {
 		scrollPane2.setBorder(null);
 		textArea.setBorder(null);
 		textField.setBorder(null);
+		newChatroom.setBorder(null);
+		logIn.setBorder(null);
+		exit.setBorder(null);
 		button.setBorder(null);
 
+		newChatroom.setFocusPainted(false);
+		logIn.setFocusPainted(false);
+		exit.setFocusPainted(false);
 		button.setFocusPainted(false);
 
 		scrollPane1.setViewportView(textArea);
@@ -146,10 +211,40 @@ public class ChatClient extends JFrame {
 			}
 		});
 		
+		newChatroom.addActionListener(e -> {
+			NewChatroomDialog n = new NewChatroomDialog(this);
+			n.setVisible(true);
+		});
+		
+		logIn.addActionListener(e -> {
+			try {
+				logOut();
+				client.close();
+			} catch (NullPointerException | IOException e1) {
+				try {client.close();} catch (Exception e2) {}
+			}
+			login.setVisible(true);
+		});
+		
+		exit.addActionListener(e -> {
+			try {
+				logOut();
+				client.close();
+			} catch (NullPointerException | IOException e1) {
+				try {client.close();} catch (Exception e2) {}
+			}
+			setVisible(false);
+			dispose();
+			System.exit(1);
+		});
+		
 		button.addActionListener(e -> send());
 
 		contentPane.add(scrollPane1);
 		contentPane.add(scrollPane2);
+		contentPane.add(newChatroom);
+		contentPane.add(logIn);
+		contentPane.add(exit);
 		contentPane.add(button);
 		
 		login = new ChatLogin(this);
@@ -163,8 +258,7 @@ public class ChatClient extends JFrame {
 	    out = new PrintStream(client.getOutputStream());
 
 	    try {
-	        CLIENT_ID = Integer.parseInt(in.readLine()); // Receive ID FIRST
-
+	        CLIENT_ID = Integer.parseInt(in.readLine()); 
 	    } catch (NumberFormatException e1) {
 	        e1.printStackTrace();
 	    } catch (IOException e1) {
@@ -172,14 +266,12 @@ public class ChatClient extends JFrame {
 	    }
 	    
 	    if (username.equals(DEFAULT_USERNAME)) {
-	    	username = "User-" + CLIENT_ID;
+	    	username = DEFAULT_USERNAME + CLIENT_ID;
         }
 	    
 	    out.println(username);
-
-	    System.out.println("Connect end");
-
-	    executer.submit(new ChatClientThread(in, textArea));
+	    
+	    executer.submit(new ChatClientThread(this, in, textArea));
 	}
 
 	private void send() {
@@ -197,13 +289,16 @@ public class ChatClient extends JFrame {
 			e.printStackTrace();
 		}
 	}
-
+	public void logOut () throws NullPointerException, IOException {
+		out.println("/logout");
+		in.readLine();
+	}
+	
 	public static void main(String[] args) {
 		ChatClient c = new ChatClient();
 		c.setVisible(true);
 	}
 
-	@SuppressWarnings("serial")
 	private class ChatLogin extends JDialog {
 		private Container contentPane;
 
@@ -220,7 +315,7 @@ public class ChatClient extends JFrame {
 		public ChatLogin(ChatClient owner) {
 			super(owner, "Log In", true);
 			setResizable(false);
-			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			setDefaultCloseOperation(HIDE_ON_CLOSE);
 			setBounds(owner.getX(), owner.getY(), 1080, 720);
 			
 			contentPane = getContentPane();
@@ -325,7 +420,7 @@ public class ChatClient extends JFrame {
 				}
 			});
 
-			buttonConnect.setBounds(10, 615, 1044, 55);
+			buttonConnect.setBounds(10, 615, getWidth()-20-6, 55);
 
 			contentPane.add(labelIP);
 			contentPane.add(labelPort);
@@ -342,6 +437,104 @@ public class ChatClient extends JFrame {
 			titleLable.setFont(new Font("Arial", Font.PLAIN, 80));
 			titleLable.setBounds(10, 11, 1044, 108);
 			getContentPane().add(titleLable);
+		}
+	}
+	private class NewChatroomDialog extends JDialog {
+		private Container contentPane;
+
+		private JLabel nameLabel;
+		private JLabel portLabel;
+		
+		private JTextField nameTextfield;
+		private JTextField portTextfield;
+		
+		private JButton create;
+		private JButton close;
+
+		public NewChatroomDialog(ChatClient owner) {
+			super(owner, "New Chatroom", true);
+			setResizable(false);
+			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+			setBounds(owner.getX(), owner.getY(), 1080, 720);
+			
+			contentPane = getContentPane();
+			contentPane.setLayout(null);
+			contentPane.setBackground(colours[0][1]);
+
+			nameLabel = new JLabel();
+			nameLabel.setForeground(colours[0][3]);
+			
+			portLabel = new JLabel();
+			portLabel.setForeground(colours[0][3]);
+			
+			nameTextfield = new JTextField();
+			nameTextfield.setBackground(colours[0][2]);
+			nameTextfield.setForeground(colours[0][3]);
+			nameTextfield.setBorder(null);
+			
+			portTextfield = new JTextField();
+			portTextfield.setBackground(colours[0][2]);
+			portTextfield.setForeground(colours[0][3]);
+			portTextfield.setBorder(null);
+			
+			
+			create = new JButton();
+			create.setBackground(colours[0][4]);
+			create.setForeground(colours[0][2]);
+			create.setFocusPainted(false);
+			create.setBorderPainted(false);
+			
+			close = new JButton();
+			close.setBackground(colours[0][4]);
+			close.setForeground(colours[0][2]);
+			close.setFocusPainted(false);
+			close.setBorderPainted(false);
+
+			nameLabel.setText("Enter name of the new Server: ");
+			portLabel.setText("Enter port of the new Server: ");
+
+			nameTextfield.setText("");
+			portTextfield.setText("");
+			
+			create.setText("Create");
+			close.setText("Close");
+
+			nameLabel.setBounds(10, 10, 2*getWidth()/5-6-20, 50);
+			nameLabel.setFont(new Font("Arial", Font.PLAIN, nameLabel.getHeight()/2+1));
+			
+			portLabel.setBounds(10, 70, 2*getWidth()/5-6-20, 50);
+			portLabel.setFont(new Font("Arial", Font.PLAIN, portLabel.getHeight()/2+1));
+			
+			nameTextfield.setBounds(10 + 2*getWidth()/5-6-10, 10, 3*getWidth()/5-6-20, 50);
+			nameTextfield.setFont(new Font("Arial", Font.PLAIN, nameTextfield.getHeight()/2+1));
+			nameTextfield.setBorder(null);
+			
+			portTextfield.setBounds(10 + 2*getWidth()/5-6-10, 70, 3*getWidth()/5-6-20, 50);
+			portTextfield.setFont(new Font("Arial", Font.PLAIN, portTextfield.getHeight()/2+1));
+			portTextfield.setBorder(null);
+			
+
+			create.setBounds(10, 615, ((getWidth()-6)/2)-10, 55);
+			close.setBounds(((getWidth()-6)/2)+10, 615, ((getWidth()-6)/2)-10, 55);
+			create.setFont(new Font("Arial", Font.PLAIN, create.getHeight()/2+1));
+			close.setFont(new Font("Arial", Font.PLAIN, close.getHeight()/2+1));
+
+			create.addActionListener(e -> {
+				
+			});
+			
+			close.addActionListener(e -> {
+				setVisible(false);
+				dispose();
+			});
+			
+			contentPane.add(nameLabel);
+			contentPane.add(portLabel);
+
+			contentPane.add(nameTextfield);
+
+			contentPane.add(create);
+			contentPane.add(close);
 		}
 	}
 }

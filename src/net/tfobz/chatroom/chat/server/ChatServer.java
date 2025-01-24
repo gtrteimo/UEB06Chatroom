@@ -27,14 +27,16 @@ public class ChatServer {
 	public static final int DEFAULT_PORT = 10000;
 	private int port = DEFAULT_PORT;
 	
+	public String name = "Main Chatroom";
+	public String password = null;
+	
 	private Scanner consoleIn;
 	
 	private ServerSocket server;
 	
 	private ExecutorService executer;
 	
-	ArrayList<PrintStream> outputStreams = new ArrayList<PrintStream>();
-
+	ArrayList<ChatServerThread> serverThreads = new ArrayList<ChatServerThread>();
 	
 	public ChatServer () {
 		executer = Executors.newCachedThreadPool();
@@ -64,6 +66,10 @@ public class ChatServer {
 		}
 		SERVER_ID = serverIDCounter++;
 	}
+	public ChatServer (String name) {
+		
+		SERVER_ID = serverIDCounter++;
+	}
 	
 	private void accept () {
 		try {
@@ -72,6 +78,8 @@ public class ChatServer {
 				ChatServerThread t = new ChatServerThread(this, client);
 				executer.submit(t);
 			}
+		} catch (IllegalArgumentException e) {
+			
 		} catch (IOException e) {
 			try { server.close(); } catch (Exception e1) { ; }
 			e.printStackTrace();
