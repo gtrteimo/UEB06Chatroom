@@ -1,5 +1,6 @@
 package net.tfobz.chatroom.chat.server;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,9 +19,9 @@ public class ChatServerThread implements Callable<Integer> {
 	public BufferedReader in;
 	public PrintStream out;
 	private String username;
+	private String colorUsername;
 	
 	public ChatServerThread(ChatServer owner, Socket client) throws IOException, IllegalArgumentException{
-		CLIENT_ID = ClientIDCounter++;
 		this.owner = owner;
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -29,23 +30,28 @@ public class ChatServerThread implements Callable<Integer> {
 			out.println("Wrong Password!");
 			throw new IllegalArgumentException("Wrong Password!");
 		}
+		CLIENT_ID = ClientIDCounter++;
 	}
 	
 	@Override
 	public Integer call() throws Exception {
 	    try {
-	        out.println(CLIENT_ID);
+	        username = in.readLine();
 
-//			int rndm = (int)(Math.random()*24)+12;
-			String rndmColor = "";//"\u001B["+rndm+"m";
-	        username = rndmColor + in.readLine(); 
+	        //TODO CheckUsername
+	    	
+	        out.println(CLIENT_ID);
+	        
+	        Color color = Color.RED;
+	        String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+	        colorUsername = "<span style=\"color: " + colour + ";\">" + in.readLine() + "</span>";
 	        
 	        owner.serverThreads.add(this);
 
-	        System.out.println(username + " signed in. " + owner.serverThreads.size() + " users");
+	        System.out.println(colorUsername + " signed in. " + owner.serverThreads.size() + " users");
 
 	        for (ChatServerThread t : owner.serverThreads) {
-	            t.out.println(username + " signed in");
+	            t.out.println(colorUsername + " signed in");
 	        }
 
 	        readInput();
@@ -70,10 +76,10 @@ public class ChatServerThread implements Callable<Integer> {
 	    String line = in.readLine();
 	    while (running) {
 	    	if (line != null && !line.isEmpty()) {
-	    		System.out.println(username + ": " + line);
+	    		System.out.println(colorUsername + ": " + line);
 		        if (line.charAt(0) != '/') {
 		        	for (ChatServerThread t : owner.serverThreads) {
-		                t.out.println(username + ": " + line);
+		                t.out.println(colorUsername + ": " + line);
 			        }
 		        } else {
 		            command(line.substring(1));
@@ -85,10 +91,10 @@ public class ChatServerThread implements Callable<Integer> {
 	
 	private void signOut () {
     	for (ChatServerThread t : owner.serverThreads) {
-			t.out.println(username + " signed out");
+			t.out.println(colorUsername + " signed out");
 		}
 		owner.serverThreads.remove(this);
-		System.out.println(username + " signed out. " + owner.serverThreads.size() + " users");
+		System.out.println(colorUsername + " signed out. " + owner.serverThreads.size() + " users");
 	}
 	
 	private void command (String commandString) {
