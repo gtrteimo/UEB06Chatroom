@@ -49,6 +49,7 @@ public class ChatServer {
 					System.out.print("Geben sie den Port an auf dem der Server laufen soll (1025-65535): ");
 					input = Integer.parseInt(consoleIn.next().trim().replaceAll("\n", ""));
 				}
+				port = input;
 				server = new ServerSocket(port);
 				System.out.println("Chat server started");
 				repeat = false;
@@ -74,7 +75,7 @@ public class ChatServer {
 	private void accept () {
 		try {
 			while (true) {
-				Socket client = server.accept();	
+				Socket client = server.accept();
 				ChatServerThread t = new ChatServerThread(this, client);
 				executer.submit(t);
 			}
