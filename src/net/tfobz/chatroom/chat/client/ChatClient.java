@@ -142,6 +142,7 @@ public class ChatClient extends JFrame {
 				return true;
 			}
 		};
+		textArea.setText("text/html");
 		textField = new JEditorPane() {
 			@Override
 			public boolean getScrollableTracksViewportWidth() {
@@ -364,11 +365,11 @@ public class ChatClient extends JFrame {
 						connect();
 						setVisible(false);
 					} catch (ConnectException ex) {
-						//new CustomWarningDialog("Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"");
+						CustomWarningDialog.showWarning("Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"");
 						//TODO funktioniert net
-						JOptionPane.showMessageDialog(ChatLogin.this, "Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"", "Error", JOptionPane.ERROR_MESSAGE);
+//						JOptionPane.showMessageDialog(ChatLogin.this, "Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"", "Error", JOptionPane.ERROR_MESSAGE);
 					} catch (IOException ex) {
-						new CustomWarningDialog("Couldn't connect to Server!");
+						CustomWarningDialog.showWarning("Couldn't connect to Server!");
 						ex.printStackTrace();
 					}
 				}
