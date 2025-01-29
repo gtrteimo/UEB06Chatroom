@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -14,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
@@ -24,9 +27,12 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import com.sun.media.jfxmedia.events.NewFrameEvent;
 
 @SuppressWarnings("serial")
 public class ChatClient extends JFrame {	
@@ -251,12 +257,15 @@ public class ChatClient extends JFrame {
 		login.setVisible(true);
 	}
 
-	public void connect() throws UnknownHostException, IOException {
+	public void connect() throws UnknownHostException, ConnectException, IOException {
+//		System.out.println("IP: "+ip+", Port: "+port);
 	    client = new Socket(ip, port);
-
+	    
 	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 	    out = new PrintStream(client.getOutputStream());
 
+	    out.println(username);
+	    
 	    try {
 	        CLIENT_ID = Integer.parseInt(in.readLine()); 
 	    } catch (NumberFormatException e1) {
@@ -264,13 +273,7 @@ public class ChatClient extends JFrame {
 	    } catch (IOException e1) {
 	        e1.printStackTrace();
 	    }
-	    
-	    if (username.equals(DEFAULT_USERNAME)) {
-	    	username = DEFAULT_USERNAME + CLIENT_ID;
-        }
-	    
-	    out.println(username);
-	    
+	    	    	    
 	    executer.submit(new ChatClientThread(this, in, textArea));
 	}
 
@@ -346,9 +349,11 @@ public class ChatClient extends JFrame {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						if (!textFieldPort.getText().trim().replaceAll("\n", "").replaceAll(".", "").isEmpty()) {						
-							ip = textFieldIP.getText().trim().replaceAll("\n", "").replaceAll(".", "");
+						String temp = textFieldIP.getText();
+						if (!temp.trim().replaceAll("\n", "").replaceAll(".", "").isEmpty()) {						
+							temp = temp.trim().replaceAll("\n", "");
 						} 
+						ip = temp;
 						if (textFieldPort.getText().trim().replaceAll("\n", "").isEmpty()) {
 							port = DEFAULT_PORT;
 						} else {
@@ -358,10 +363,12 @@ public class ChatClient extends JFrame {
 //						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						connect();
 						setVisible(false);
-					} catch (UnknownHostException ex) {
-						new CustomWarningDialog("Wrong Values!");
+					} catch (ConnectException ex) {
+						//new CustomWarningDialog("Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"");
+						//TODO funktioniert net
+						JOptionPane.showMessageDialog(ChatLogin.this, "Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"", "Error", JOptionPane.ERROR_MESSAGE);
 					} catch (IOException ex) {
-						new CustomWarningDialog("Could'nt connect to Server!");
+						new CustomWarningDialog("Couldn't connect to Server!");
 						ex.printStackTrace();
 					}
 				}
@@ -388,37 +395,69 @@ public class ChatClient extends JFrame {
 			textFieldPort.setBounds(340, 300, 600, 100);
 			textFieldPort.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldPort.setBorder(null);
-			textFieldPort.addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					JTextField c = (JTextField) getFocusOwner();
-					if (!(e.getKeyChar() >= '0' && e.getKeyChar() <= '9' && textFieldPort.getText().length() < 5
-							|| e.getKeyChar() == KeyEvent.VK_BACK_SPACE))
-						c.setEditable(false);
+			textFieldPort.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					String text = textFieldPort.getText();
+					text = text.replaceAll("[^0-9]", "");
+					try {
+						int por = Integer.parseInt(text);
+						if (por < 1025 || por > 65535) {
+							text = DEFAULT_PORT+"";
+						}
+					} catch (NumberFormatException ex) {
+						text = DEFAULT_PORT+"";
+					}
+	                textFieldPort.setText(text);
 				}
-
-				public void keyReleased(KeyEvent e) {
-					JTextField c = (JTextField) getFocusOwner();
-					c.setEditable(true);
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					textFieldPort.selectAll();
 				}
 			});
 
 			textFieldIP.setBounds(340, 150, 600, 100);
 			textFieldIP.setFont(new Font("Arial", Font.PLAIN, 40));
 			textFieldIP.setBorder(null);
-			textFieldIP.addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					JTextField c = (JTextField) getFocusOwner();
-					if (!(e.getKeyChar() >= '0' && e.getKeyChar() <= '9' && textFieldIP.getText().length() < 15
-							|| e.getKeyChar() == KeyEvent.VK_PERIOD && textFieldIP.getText().length() < 15
-							|| e.getKeyChar() == KeyEvent.VK_BACK_SPACE))
-						c.setEditable(false);
-				}
+			textFieldIP.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					String text = textFieldIP.getText();
+					if (!text.matches("^(\\d{1,3}\\.){3}\\d{1,3}$")) {
+						text = DEFAULT_IP;
+				    }
 
-				public void keyReleased(KeyEvent e) {
-					JTextField c = (JTextField) getFocusOwner();
-					c.setEditable(true);
+				    String[] parts = text.split("\\.");
+				    if (parts.length != 4) {
+						text = DEFAULT_IP;
+				    }
+
+				    for (String part : parts) {
+				        try {
+				            int num = Integer.parseInt(part);
+				            if (num < 0 || num > 255) {
+								text = DEFAULT_IP;
+								break;
+				            }
+				        } catch (NumberFormatException ex) {
+							text = DEFAULT_IP;
+							break;
+				        }
+			        }
+					if (!text.equals("localhost")) {
+						text = text.replaceAll("[^0-9.]", "");
+				    }
+							        
+	                textFieldIP.setText(text);
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					textFieldPort.selectAll();
 				}
 			});
+
 
 			buttonConnect.setBounds(10, 615, getWidth()-20-6, 55);
 
@@ -444,13 +483,19 @@ public class ChatClient extends JFrame {
 
 		private JLabel nameLabel;
 		private JLabel portLabel;
+		private JLabel passwordLabel;
 		
 		private JTextField nameTextfield;
 		private JTextField portTextfield;
+		private JTextField passwordTextfield;
 		
 		private JButton create;
 		private JButton close;
 
+		private String name = null;
+		private String password = null;
+
+		
 		public NewChatroomDialog(ChatClient owner) {
 			super(owner, "New Chatroom", true);
 			setResizable(false);
@@ -467,6 +512,9 @@ public class ChatClient extends JFrame {
 			portLabel = new JLabel();
 			portLabel.setForeground(colours[0][3]);
 			
+			passwordLabel = new JLabel();
+			passwordLabel.setForeground(colours[0][3]);
+			
 			nameTextfield = new JTextField();
 			nameTextfield.setBackground(colours[0][2]);
 			nameTextfield.setForeground(colours[0][3]);
@@ -477,6 +525,10 @@ public class ChatClient extends JFrame {
 			portTextfield.setForeground(colours[0][3]);
 			portTextfield.setBorder(null);
 			
+			passwordTextfield = new JTextField();
+			passwordTextfield.setBackground(colours[0][2]);
+			passwordTextfield.setForeground(colours[0][3]);
+			passwordTextfield.setBorder(null);			
 			
 			create = new JButton();
 			create.setBackground(colours[0][4]);
@@ -492,9 +544,11 @@ public class ChatClient extends JFrame {
 
 			nameLabel.setText("Enter name of the new Server: ");
 			portLabel.setText("Enter port of the new Server: ");
+			passwordLabel.setText("Enter password of the new Server: ");
 
 			nameTextfield.setText("");
 			portTextfield.setText("");
+			passwordTextfield.setText("");
 			
 			create.setText("Create");
 			close.setText("Close");
@@ -505,6 +559,9 @@ public class ChatClient extends JFrame {
 			portLabel.setBounds(10, 70, 2*getWidth()/5-6-20, 50);
 			portLabel.setFont(new Font("Arial", Font.PLAIN, portLabel.getHeight()/2+1));
 			
+			passwordLabel.setBounds(10, 130, 2*getWidth()/5-6-20, 50);
+			passwordLabel.setFont(new Font("Arial", Font.PLAIN, portLabel.getHeight()/2+1));
+			
 			nameTextfield.setBounds(10 + 2*getWidth()/5-6-10, 10, 3*getWidth()/5-6-20, 50);
 			nameTextfield.setFont(new Font("Arial", Font.PLAIN, nameTextfield.getHeight()/2+1));
 			nameTextfield.setBorder(null);
@@ -513,15 +570,17 @@ public class ChatClient extends JFrame {
 			portTextfield.setFont(new Font("Arial", Font.PLAIN, portTextfield.getHeight()/2+1));
 			portTextfield.setBorder(null);
 			
+			passwordTextfield.setBounds(10 + 2*getWidth()/5-6-10, 130, 3*getWidth()/5-6-20, 50);
+			passwordTextfield.setFont(new Font("Arial", Font.PLAIN, portTextfield.getHeight()/2+1));
+			passwordTextfield.setBorder(null);
+			
 
 			create.setBounds(10, 615, ((getWidth()-6)/2)-10, 55);
 			close.setBounds(((getWidth()-6)/2)+10, 615, ((getWidth()-6)/2)-10, 55);
 			create.setFont(new Font("Arial", Font.PLAIN, create.getHeight()/2+1));
 			close.setFont(new Font("Arial", Font.PLAIN, close.getHeight()/2+1));
 
-			create.addActionListener(e -> {
-				
-			});
+			create.addActionListener(e -> create());
 			
 			close.addActionListener(e -> {
 				setVisible(false);
@@ -530,11 +589,45 @@ public class ChatClient extends JFrame {
 			
 			contentPane.add(nameLabel);
 			contentPane.add(portLabel);
+			contentPane.add(passwordLabel);
 
 			contentPane.add(nameTextfield);
+			contentPane.add(portTextfield);
+			contentPane.add(passwordTextfield);
 
 			contentPane.add(create);
 			contentPane.add(close);
+		}
+		private void create () {			
+			name = nameTextfield.getText().trim().replaceAll("\n", "");
+			if (portTextfield.getText().trim().replaceAll("\n", "").isEmpty()) {
+				port = DEFAULT_PORT;
+			} else {
+				port = Integer.valueOf(portTextfield.getText());
+			}
+			password = passwordTextfield.getText().trim().replaceAll("\n", "");
+			
+			try {
+				out.println("/Chatroom("+name+", "+password+", "+port+")");
+			} catch (Exception e1) {
+				try {client.close();} catch (Exception e2) {}
+			}
+			
+			try {
+				logOut();
+				client.close();
+			} catch (NullPointerException | IOException e1) {
+				try {client.close();} catch (Exception e2) {}
+			}
+			
+			try {
+				connect();
+			} catch (NullPointerException | IOException e1) {
+				try {client.close();} catch (Exception e2) {}
+			}
+			
+			setVisible(false);
+			dispose();
 		}
 	}
 }

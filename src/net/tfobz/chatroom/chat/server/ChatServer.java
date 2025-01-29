@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -38,7 +39,9 @@ public class ChatServer {
 	
 	ArrayList<ChatServerThread> serverThreads = new ArrayList<ChatServerThread>();
 	
-	public ChatServer () {
+	HashMap<String, Integer> serverPorts = new HashMap<String, Integer>();
+	
+	public ChatServer () throws IOException, NumberFormatException{
 		executer = Executors.newCachedThreadPool();
 		consoleIn = new Scanner(System.in);
 		boolean repeat = true;
@@ -53,16 +56,17 @@ public class ChatServer {
 				server = new ServerSocket(port);
 				System.out.println("Chat server started");
 				repeat = false;
-			} catch (NoSuchElementException e) {
-				e.printStackTrace();
-				try {server.close();} catch (Exception e2) {}
-				System.exit(0);
-			} catch (NumberFormatException e) {
-				System.out.println("Port has to be an Integer!"); 
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.out.println(e.getMessage());
-				try {server.close();} catch (Exception e2) {}
+				serverPorts.put("Main", port);
+			} catch (BindException ex) {
+				throw new IOException("Port already in use!");
+			} catch (NoSuchElementException ex) {
+				try {server.close();} catch (Exception ex2) {}
+				throw new IOException(ex.getMessage());
+			} catch (NumberFormatException ex) {
+				throw new NumberFormatException("Port has to be an Integer!");
+			} catch (IOException ex) {
+				try {server.close();} catch (Exception ex2) {}
+				throw new IOException(ex.getMessage());
 			}
 		}
 		SERVER_ID = serverIDCounter++;
@@ -88,7 +92,12 @@ public class ChatServer {
 	}
 	
 	public static void main(String[] args) {
-		ChatServer s = new ChatServer();
-		s.accept();
+		ChatServer s;
+		try {
+			s = new ChatServer();
+			s.accept();
+		} catch (NumberFormatException | IOException e) {
+			System.out.println(e.getMessage());
+		}
 	}
 }

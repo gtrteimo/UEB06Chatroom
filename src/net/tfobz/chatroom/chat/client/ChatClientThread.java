@@ -26,7 +26,6 @@ public class ChatClientThread implements Callable<Integer> {
 			String line = "";
 			while (line!=null) {
 				line = in.readLine();
-				System.out.println(line);
 				if (line != null) {
 					String text = textArea.getText();
 					if (text!=null&&!text.isEmpty()) {
@@ -34,33 +33,11 @@ public class ChatClientThread implements Callable<Integer> {
 					}
 					System.out.println(line);
 					textArea.setText(text+line);
-				}
-//				if (textArea.getText() != null && !textArea.getText().isEmpty() && !textArea.getText().equals("null")) {
-//					System.out.println(1);
-//					final String text = textArea.getText() + "\n";
-//					System.out.println("Hilfe1: "+ textArea.getText());
-//					EventQueue.invokeLater(() -> {
-//						textArea.setText(text + line);
-//					});
-//				} else if (textArea.getText() != null && !textArea.getText().equals("null")){
-//					System.out.println(2);
-//					System.out.println("Hilfe2: "+ textArea.getText());
-//					EventQueue.invokeLater(() -> {
-//						textArea.setText(line);
-//					});
-//				} else {
-//					System.out.println(3);
-//					System.out.println("Hilfe3: "+ textArea.getText()==null?"null":textArea.getText());
-//					owner.setVisible(false);
-//					owner.dispose();
-//					System.exit(3);
-//				}
-				
+				}				
 				
 			}
 		} catch (SocketException e) {
-			System.out.println("Connection to ChatSertry { server.close(); } catch (Exception e1) { ; }ver lost");
-			e.printStackTrace();
+			System.out.println("Connection to Chatserver lost");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
