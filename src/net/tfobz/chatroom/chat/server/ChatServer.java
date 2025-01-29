@@ -18,6 +18,8 @@ import java.util.concurrent.Executors;
 
 public class ChatServer {
 	
+	public Object LOCK = new Object();
+	
 	public static int serverIDCounter = 0;
 		
 	public static int clientIDCounter = 0;

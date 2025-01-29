@@ -46,7 +46,9 @@ public class ChatServerThread implements Callable<Integer> {
 	        String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
 	        colorUsername = "<span style=\"color: " + colour + ";\">" + in.readLine() + "</span>";
 	        
-	        owner.serverThreads.add(this);
+	        synchronized (owner.LOCK) {
+		        owner.serverThreads.add(this);
+			}
 
 	        System.out.println(colorUsername + " signed in. " + owner.serverThreads.size() + " users");
 
