@@ -81,7 +81,7 @@ public class ChatServer {
 	private void accept () {
 		try {
 			while (true) {
-				Socket client = server.accept();	
+				Socket client = server.accept();
 				ChatServerThread t = new ChatServerThread(this, client);
 				executer.submit(t);
 			}
