@@ -262,10 +262,13 @@ public class ChatClient extends JFrame {
 	    out = new PrintStream(client.getOutputStream());
 	   
 	    out.println(username);
-	    
+//    	System.out.println("Vor Wrong username");
 	    while (in.readLine().equals("invalid")) {
+//	    	System.out.println("Wrong username");
 		    out.println(JOptionPane.showInputDialog(this, "Enter new username"));
+//	    	System.out.println("Wrong username2");
 	    } 
+//    	System.out.println("Nach Wrong username");
 	    String line = "";
 	    try {
 	    	line = in.readLine();
@@ -273,14 +276,15 @@ public class ChatClient extends JFrame {
 	    } catch (NumberFormatException e1) {
 	    	CLIENT_ID = -1;
 	    	textArea.setText("<html><head></head><body>"+line+"</body></html>");
+	    	CustomWarningDialog.showWarning("Using not native Server!");
 //	        e1.printStackTrace();
 	    } catch (IOException e1) {
 	        e1.printStackTrace();
 	    }
 	    
-	    System.out.println("Hall01");
+//	    System.out.println("Hall01");
 //	    System.out.println("Hall02 "+ in.readLine());
-	    System.out.println("Hall03");
+//	    System.out.println("Hall03");
 	    
 	    executer.submit(new ChatClientThread(this, in, textArea));
 	}

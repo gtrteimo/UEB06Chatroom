@@ -43,20 +43,27 @@ public class ChatServerThread implements Callable<Integer> {
 	        
 	        boolean valid = true;
 	        do {
+	        	valid = true;
 		        username = in.readLine().trim();
+//	        	System.out.println("Test1");
 		        synchronized (owner.LOCK) {
 		        	for (ChatServerThread t : owner.serverThreads) {
 			            if (username.equals(t.username)) {
 			            	valid = false;
 			            }
 			        }
-				}		    	
+				}		    
+//	        	System.out.println("Test2");
 		        if (valid) {
+//		        	System.out.println("Test3");
 		        	out.println("valid");
 		        } else {
-		        	out.print("invalid");
+//		        	System.out.println("Test4");
+		        	out.println("invalid");
 		        }
+//	        	System.out.println("Test5");
 	        } while (!valid);
+//        	System.out.println("Test6");
 	        System.out.println(CLIENT_ID);
 	        out.println(CLIENT_ID);
 	        
@@ -108,14 +115,6 @@ public class ChatServerThread implements Callable<Integer> {
 		        line = in.readLine();
 	    	}
 	    }
-	}
-	
-	private void signOut () {
-    	for (ChatServerThread t : owner.serverThreads) {
-			t.out.println(colorUsername + " signed out");
-		}
-		owner.serverThreads.remove(this);
-		System.out.println(username + " signed out. " + owner.serverThreads.size() + " users");
 	}
 
 	private void signOut() {
