@@ -10,11 +10,10 @@ import java.util.Random;
 import java.util.concurrent.Callable;
 
 public class ChatServerThread implements Callable<Integer> {
-	
-	private static final String[] commands = {
-		"/help", "/logout", "/newServer", "/msg", "/changeColour", "/listClients"
-	};
-	
+
+	private static final String[] commands = { "/help", "/logout", "/newServer", "/msg", "/changeColour",
+			"/listClients" };
+
 	private static int ClientIDCounter = 0;
 
 	public final int CLIENT_ID;
@@ -23,7 +22,7 @@ public class ChatServerThread implements Callable<Integer> {
 	private Socket client;
 	public BufferedReader in;
 	public PrintStream out;
-    private Color color;
+	private Color color;
 	private String username;
 	private String colorUsername;
 
@@ -41,44 +40,44 @@ public class ChatServerThread implements Callable<Integer> {
 
 	@Override
 	public Integer call() throws Exception {
-	    try {
-	        
-	        boolean valid = true;
-	        do {
-	        	valid = true;
-		        username = in.readLine().trim();
+		try {
+
+			boolean valid = true;
+			do {
+				valid = true;
+				username = in.readLine().trim();
 //	        	System.out.println("Test1");
-		        synchronized (owner.LOCK) {
-		        	for (ChatServerThread t : owner.serverThreads) {
-			            if (username.equals(t.username)) {
-			            	valid = false;
-			            }
-			        }
-				}		    
+				synchronized (owner.LOCK) {
+					for (ChatServerThread t : owner.serverThreads) {
+						if (username.equals(t.username)) {
+							valid = false;
+						}
+					}
+				}
 //	        	System.out.println("Test2");
-		        if (valid) {
+				if (valid) {
 //		        	System.out.println("Test3");
-		        	out.println("valid");
-		        } else {
+					out.println("valid");
+				} else {
 //		        	System.out.println("Test4");
-		        	out.println("invalid");
-		        }
+					out.println("invalid");
+				}
 //	        	System.out.println("Test5");
-	        } while (!valid);
+			} while (!valid);
 //        	System.out.println("Test6");
-	        System.out.println(CLIENT_ID);
-	        out.println(CLIENT_ID);
-	        
-	        Random rand = new Random();
-	        color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-	        String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
-	        colorUsername = "<span style=\"color: " + colour + ";\">" + username + "</span>";
-	        
-	        synchronized (owner.LOCK) {
-		        owner.serverThreads.add(this);
+			System.out.println(CLIENT_ID);
+			out.println(CLIENT_ID);
+
+			Random rand = new Random();
+			color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+			String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+			colorUsername = "<span style=\"color: " + colour + ";\">" + username + "</span>";
+
+			synchronized (owner.LOCK) {
+				owner.serverThreads.add(this);
 			}
 
-	        System.out.println(username + " signed in. " + owner.serverThreads.size() + " users");
+			System.out.println(username + " signed in. " + owner.serverThreads.size() + " users");
 
 			synchronized (owner.LOCK) {
 				for (ChatServerThread t : owner.serverThreads) {
@@ -104,21 +103,22 @@ public class ChatServerThread implements Callable<Integer> {
 
 	private void readInput() throws IOException {
 		boolean running = true;
-	    String line = in.readLine();
-	    while (running) {
-	    	if (line != null && !line.isEmpty()) {
-	    		System.out.println(username + ": " + line);
-		        if (line.charAt(0) != '/') {
-		        	for (ChatServerThread t : owner.serverThreads) {
-		                t.out.println(colorUsername + ": " + line);
-			        }
-		        } else {
-		            command(line);
-		        }
-		        line = in.readLine();
-	    	}
-	    }
+		String line = in.readLine();
+		while (running) {
+			if (line != null && !line.isEmpty()) {
+				System.out.println(username + ": " + line);
+				if (line.charAt(0) != '/') {
+					for (ChatServerThread t : owner.serverThreads) {
+						t.out.println(colorUsername + ": " + line);
+					}
+				} else {
+					command(line);
+				}
+				line = in.readLine();
+			}
+		}
 	}
+
 	private void signOut() {
 		synchronized (owner.LOCK) {
 			for (ChatServerThread t : owner.serverThreads) {
@@ -142,34 +142,43 @@ public class ChatServerThread implements Callable<Integer> {
 	}
 	
 	private void command(String commandString) {
-	    try {
-	        if (commandString.equals("/logout")) {
-	            client.close();
-	        } else if (commandString.equals("/newServer")) {
-	            out.println("Creating a new server...");
-	        } else if (commandString.startsWith("/msg")) {
-	    		synchronized (owner.LOCK) {
-	    			for (ChatServerThread t : owner.serverThreads) {
-	    				if (t.username.equals(commandString.substring(3))) {
-	    					t.out.println();
-	    				}
-	    			}
-	    		}
-	        } else if (commandString.equals("/changeColour")) {
-		        Random rand = new Random();
-		        color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-	            out.println("Changing colour...");
-	        } else if (commandString.equals("/listClients")) {
-	            // Add logic to list clients
-	            out.println("Listing all clients...");
-	        } else if (commandString.equals("/help")) {
-	            out.println("Available commands: /logout, /newServer, /msg, /changeColour, /listClients");
-	        } else {
-	            out.println("Unknown Command! Type /help to get a list of commands");
-	        }
-	    } catch (IOException e) {
-	        out.println("An error occurred while executing the command.");
-	    }
+		try {
+			if (commandString.equals("/logout")) {
+				client.close();
+			} else if (commandString.equals("/newServer")) {
+				out.println("Creating a new server...");
+			} else if (commandString.startsWith("/msg")) {
+				synchronized (owner.LOCK) {
+					for (ChatServerThread t : owner.serverThreads) {
+						if (t.username.equals(commandString.substring(3))) {
+							int firstSpace = commandString.indexOf(" ");
+							if (firstSpace != -1) {
+								int secondSpace = commandString.indexOf(" ", firstSpace + 1);
+								if (secondSpace != -1) {
+									commandString.substring(secondSpace + 1);
+									t.out.println(commandString.substring(secondSpace + 1));
+								}
+							}
+						}
+					}
+				}
+			} else if (commandString.equals("/changeColour")) {
+				Random rand = new Random();
+				color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+			} else if (commandString.equals("/listClients")) {
+				synchronized (owner.LOCK) {
+					for (ChatServerThread t : owner.serverThreads) {
+						t.out.println(username);
+					}
+				}
+			} else if (commandString.equals("/help")) {
+				out.println("Available commands: /logout, /newServer, /msg, /changeColour, /listClients");
+			} else {
+				out.println("Unknown Command! Type /help to get a list of commands");
+			}
+		} catch (IOException e) {
+			out.println("An error occurred while executing the command.");
+		}
 	}
 
 }
