@@ -177,7 +177,7 @@ public class ChatServerThread implements Callable<Integer> {
 			} else if (commandString.startsWith(commands[4])) {
 				Random rand = new Random();
 				color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-			} else if (commandString.startsWith(commands[4])) {
+			} else if (commandString.startsWith(commands[5])) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
 						out.println(t.username);

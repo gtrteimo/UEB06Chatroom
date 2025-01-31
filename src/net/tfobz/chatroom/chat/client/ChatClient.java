@@ -517,7 +517,8 @@ public class ChatClient extends JFrame {
 			super(owner, "New Chatroom", true);
 			setResizable(false);
 			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			setBounds(owner.getX(), owner.getY(), 430, 250);
+			setSize(430, 250);
+			setLocationRelativeTo(owner);
 
 			contentPane = getContentPane();
 			contentPane.setLayout(null);
