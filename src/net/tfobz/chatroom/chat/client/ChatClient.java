@@ -155,7 +155,7 @@ public class ChatClient extends JFrame {
 		button.setText("Send");
 
 		scrollPane1.setBounds(10, 10 + 60, w - 20, h - 20 - 60 - 60);
-		scrollPane2.setBounds(10, h - 60, w - 200, 50);
+		textField.setBounds(10, h - 60, w - 200, 50);
 		newChatroom.setBounds(10, 10, (w - 20 - 20) / 3, 50);
 		logIn.setBounds(1 * (w - 20) / 3 + 15 + 10, 10, (w - 20) / 3 - 20, 50);
 		exit.setBounds(2 * (w - 20) / 3 + 10 + 20, 10, (w - 20) / 3 - 20, 50);
