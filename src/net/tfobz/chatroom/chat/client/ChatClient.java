@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -253,13 +254,16 @@ public class ChatClient extends JFrame {
 		login = new ChatLogin(this);
 		login.setVisible(true);
 	}
-
-	public void connect() throws UnknownHostException, ConnectException, IOException {
-//		System.out.println("IP: "+ip+", Port: "+port);
+	
+	public void createConnection() throws UnknownHostException, ConnectException, IOException {
+		System.out.println("IP: "+ip+", Port: "+port);
 	    client = new Socket(ip, port);
 	    
 	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 	    out = new PrintStream(client.getOutputStream());
+	}
+	
+	public void connect() throws UnknownHostException, ConnectException, IOException {
 	   
 	    out.println(username);
 //    	System.out.println("Vor Wrong username");
@@ -376,6 +380,7 @@ public class ChatClient extends JFrame {
 						}
 						username = textFieldUsername.getText();
 //						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
+						createConnection();
 						connect();
 						setVisible(false);
 					} catch (ConnectException ex) {
@@ -620,7 +625,7 @@ public class ChatClient extends JFrame {
 			password = passwordTextfield.getText().trim().replaceAll("\n", "");
 
 			try {
-				out.println("/Chatroom(" + name + ", " + password + ", " + port + ")");
+				out.println("/newServer " + name + " " + port);
 			} catch (Exception e1) {
 				try {
 					client.close();
@@ -638,14 +643,15 @@ public class ChatClient extends JFrame {
 				}
 			}
 
-			try {
-				connect();
-			} catch (NullPointerException | IOException e1) {
-				try {
-					client.close();
-				} catch (Exception e2) {
-				}
-			}
+//			try {
+//				createConnection();
+//				connect();
+//			} catch (NullPointerException | IOException e1) {
+//				try {
+//					client.close();
+//				} catch (Exception e2) {
+//				}
+//			}
 
 			setVisible(false);
 			dispose();

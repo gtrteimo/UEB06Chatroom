@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+import javax.swing.JOptionPane;
+
 public class ChatServerThread implements Callable<Integer> {
 
 	private static final String[] commands = { "/help", "/logout", "/newServer", "/msg", "/changeColour",
@@ -126,28 +128,47 @@ public class ChatServerThread implements Callable<Integer> {
 				t.out.println(colorUsername + " signed out");
 			}
 			owner.serverThreads.remove(this);
-			System.out.println(colorUsername + " signed out. " + owner.serverThreads.size() + " users");
+			System.out.println(username + " signed out. " + owner.serverThreads.size() + " users");
 		}
 	}
 
 	private void createServer(String prompt) throws NumberFormatException, IOException {
+		System.out.println("NEWWW222");
 		String[] s = prompt.split(" ");
+		System.out.println("NEWWW232");
+		System.out.println("s0: "+s[0]);
+		System.out.println("s1: "+s[1]);
+		System.out.println("s1i: "+Integer.parseInt(s[1]));
+		System.out.println("NEWWW333");
 		ChatServer c = new ChatServer(s[0], Integer.parseInt(s[1]), this);
 		owner.servers.add(c);
-		Thread t = new Thread(() -> {
+		System.out.println("NEWWW");
+		owner.executer.submit(() -> {
+			JOptionPane.showMessageDialog(null, "NEWWWWWW");
+			System.out.println("NEWWW");
 			c.accept();
 		});
-		t.setDaemon(true);
-		t.start();
+		
+//		Thread t = new Thread(() -> {
+//			
+//		});
+//		t.setDaemon(true);
+//		t.start();
 	}
 	
 	private void command(String commandString) {
 		try {
-			if (commandString.equals("/logout")) {
+			if (commandString.startsWith(commands[1])) {
 				client.close();
-			} else if (commandString.equals("/newServer")) {
-				out.println("Creating a new server...");
-			} else if (commandString.startsWith("/msg")) {
+				
+			} else if (commandString.startsWith(commands[2])) {
+				System.out.println(commandString.substring(10));
+				try {
+					createServer(commandString.substring(10).trim());
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			} else if (commandString.startsWith(commands[3])) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
 						if (t.username.equals(commandString.substring(3))) {
@@ -162,17 +183,20 @@ public class ChatServerThread implements Callable<Integer> {
 						}
 					}
 				}
-			} else if (commandString.equals("/changeColour")) {
+			} else if (commandString.startsWith(commands[4])) {
 				Random rand = new Random();
 				color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-			} else if (commandString.equals("/listClients")) {
+			} else if (commandString.startsWith(commands[4])) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
 						t.out.println(username);
 					}
 				}
-			} else if (commandString.equals("/help")) {
-				out.println("Available commands: /logout, /newServer, /msg, /changeColour, /listClients");
+			} else if (commandString.startsWith(commands[0])) {
+				out.println("List of all Commands: ");
+				for (String s: commands) {
+					out.println(s);
+				}
 			} else {
 				out.println("Unknown Command! Type /help to get a list of commands");
 			}

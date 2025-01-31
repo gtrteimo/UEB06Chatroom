@@ -41,12 +41,12 @@ public class ChatServer {
 	
 	private ServerSocket server;
 	
-	private ExecutorService executer;
+	ExecutorService executer;
 	
 	ArrayList<ChatServerThread> serverThreads = new ArrayList<ChatServerThread>();
 	ArrayList<ChatServer> servers = new ArrayList<ChatServer>();
 		
-	public ChatServer () throws IOException, NumberFormatException{
+	public ChatServer () throws IOException, NumberFormatException {
 		executer = Executors.newCachedThreadPool();
 		consoleIn = new Scanner(System.in);
 		boolean repeat = true;
@@ -76,8 +76,16 @@ public class ChatServer {
 		}
 		SERVER_ID = serverIDCounter++;
 	}
-	public ChatServer (String name, int port, ChatServerThread admin) throws IOException {
-		server = new ServerSocket(port);
+	public ChatServer (String name, int port, ChatServerThread admin) {
+		this.name = name;
+		System.out.println(port);
+		try {
+			server = new ServerSocket(port);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println(port);
 		servers.add(this);
 		SERVER_ID = serverIDCounter++;
 	}
