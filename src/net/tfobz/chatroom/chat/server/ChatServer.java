@@ -1,16 +1,10 @@
 package net.tfobz.chatroom.chat.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.InputMismatchException;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
@@ -18,6 +12,8 @@ import java.util.concurrent.Executors;
 
 import net.tfobz.chatroom.chat.client.ChatClient;
 
+
+//@SuppressWarnings("unused")
 public class ChatServer {
 	
 	public Object LOCK = new Object();
@@ -26,20 +22,17 @@ public class ChatServer {
 		
 	public static int clientIDCounter = 0;
 	
-	private static final int MAX_CLIENTS = 50;
 	private final int SERVER_ID;
 	
 	public static final int DEFAULT_PORT = 10000;
 	private int port = DEFAULT_PORT;
-	
-	private ChatClient admin;
-	
+		
 	public String name = "Main Chatroom";
 	public String password = null;
 	
 	private Scanner consoleIn;
 	
-	private ServerSocket server;
+	protected ServerSocket server;
 	
 	ExecutorService executer;
 	
@@ -77,6 +70,7 @@ public class ChatServer {
 		SERVER_ID = serverIDCounter++;
 	}
 	public ChatServer (String name, int port, ChatServerThread admin) throws IOException {
+		executer = Executors.newCachedThreadPool();
 		this.name = name;
 		System.out.println(port);
 		server = new ServerSocket(port);
@@ -86,7 +80,6 @@ public class ChatServer {
 	}
 	
 	void accept () {
-		System.out.println("Accept");
 		try {
 			while (true) {
 				Socket client = server.accept();

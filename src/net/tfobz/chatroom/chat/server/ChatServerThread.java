@@ -14,7 +14,7 @@ import javax.swing.JOptionPane;
 public class ChatServerThread implements Callable<Integer> {
 
 	private static final String[] commands = { "/help", "/logout", "/newServer", "/msg", "/changeColour",
-			"/listClients" };
+			"/listClients", "\\clear" };
 
 	private static int ClientIDCounter = 0;
 
@@ -29,26 +29,32 @@ public class ChatServerThread implements Callable<Integer> {
 	private String colorUsername;
 
 	public ChatServerThread(ChatServer owner, Socket client) throws IOException, IllegalArgumentException {
+		System.out.println("Start");
 		this.owner = owner;
 		this.client = client;
+		System.out.println("Was 0");
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 		out = new PrintStream(client.getOutputStream());
+		System.out.println("Was 1");
 		if (owner.password != null && !in.readLine().equals(owner.password)) {
 			out.println("Wrong Password!");
 			throw new IllegalArgumentException("Wrong Password!");
 		}
+		System.out.println("Was 2");
 		CLIENT_ID = ClientIDCounter++;
 	}
 
 	@Override
 	public Integer call() throws Exception {
+		System.out.println("Was 4");
 		try {
 
 			boolean valid = true;
 			do {
+				System.out.println("Was 5");
 				valid = true;
 				username = in.readLine().trim();
-//	        	System.out.println("Test1");
+	        	System.out.println("Test1");
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
 						if (username.equals(t.username)) {
@@ -56,17 +62,17 @@ public class ChatServerThread implements Callable<Integer> {
 						}
 					}
 				}
-//	        	System.out.println("Test2");
+	        	System.out.println("Test2");
 				if (valid) {
-//		        	System.out.println("Test3");
+		        	System.out.println("Test3");
 					out.println("valid");
 				} else {
-//		        	System.out.println("Test4");
+		        	System.out.println("Test4");
 					out.println("invalid");
 				}
-//	        	System.out.println("Test5");
+	        	System.out.println("Test5");
 			} while (!valid);
-//        	System.out.println("Test6");
+        	System.out.println("Test6");
 			System.out.println(CLIENT_ID);
 			out.println(CLIENT_ID);
 
@@ -107,6 +113,7 @@ public class ChatServerThread implements Callable<Integer> {
 		boolean running = true;
 		String line = in.readLine();
 		while (running) {
+			System.out.println("Read");
 			if (line != null && !line.isEmpty()) {
 				System.out.println(username + ": " + line);
 				if (line.charAt(0) != '/') {
@@ -137,15 +144,8 @@ public class ChatServerThread implements Callable<Integer> {
 		ChatServer c = new ChatServer(s[0], Integer.parseInt(s[1]), this);
 		owner.servers.add(c);
 		owner.executer.submit(() -> {
-			
 			c.accept();
 		});
-		
-//		Thread t = new Thread(() -> {
-//			
-//		});
-//		t.setDaemon(true);
-//		t.start();
 	}
 
 	private void command(String commandString) {
@@ -177,6 +177,8 @@ public class ChatServerThread implements Callable<Integer> {
 			} else if (commandString.startsWith(commands[4])) {
 				Random rand = new Random();
 				color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+				String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+				colorUsername = "<span style=\"color: " + colour + ";\">" + username + "</span>";
 			} else if (commandString.startsWith(commands[5])) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {

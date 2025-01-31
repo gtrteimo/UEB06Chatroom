@@ -9,7 +9,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.BufferedReader;
@@ -21,14 +20,12 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
@@ -214,6 +211,8 @@ public class ChatClient extends JFrame {
 			n.setVisible(true);
 		});
 
+		newChatroom.setEnabled(false);
+		
 		logIn.addActionListener(e -> {
 			try {
 				logOut();
@@ -256,40 +255,36 @@ public class ChatClient extends JFrame {
 	}
 	
 	public void createConnection() throws UnknownHostException, ConnectException, IOException {
-		System.out.println("IP: "+ip+", Port: "+port);
+//		System.out.println("IP: "+ip+", Port: "+port);
 	    client = new Socket(ip, port);
 	    
 	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 	    out = new PrintStream(client.getOutputStream());
-		System.out.println("End: IP: "+ip+", Port: "+port);
 	}
 	
 	public void connect() throws UnknownHostException, ConnectException, IOException {
 	   
 	    out.println(username);
-	    
-		System.out.println("Hilfe 3");
-	    
+	    	    
 	    if (in.readLine().equals("invalid")) {
 	    	CustomWarningDialog.showWarning("Username already in use");
 	    	client.close();
 	    	return;
-	    } 
-		System.out.println("Hilfe 4");
-	    
+	    } 	    
 	    String line = "";
 	    try {
-			System.out.println("Hilfe 5");
 	    	line = in.readLine();
 	        CLIENT_ID = Integer.parseInt(line); 
-			System.out.println("Hilfe 6");
 	    } catch (NumberFormatException e1) {
 	    	CLIENT_ID = -1;
 	    	textArea.setText("<html><head></head><body>"+line+"</body></html>");
 	    	CustomWarningDialog.showWarning("Using not native Server!");
 	    } catch (IOException e1) {
 	        e1.printStackTrace();
-	    }	    
+	    }
+	    
+	    newChatroom.setEnabled(true);
+	    
 	    executer.submit(new ChatClientThread(this, in, textArea));
 	}
 
@@ -297,13 +292,11 @@ public class ChatClient extends JFrame {
 		try {
 			String textNew = textField.getText().trim().replaceAll("\n", "");
 			if (!textNew.isEmpty()) {
-				String textOld = textArea.getText().trim().replaceAll("\n", "");
-				if (!textOld.isEmpty()) {
-					textOld += "\n";
+				if (textNew.equals("\\clear")) {
+			    	textArea.setText("<html><head></head><body>"+"</body></html>");
 				} else {
-					
+					out.println(textNew);
 				}
-				out.println(textNew);
 			}
 			textField.setText("");
 		} catch (Exception e) {
@@ -313,6 +306,7 @@ public class ChatClient extends JFrame {
 
 	public void logOut() throws NullPointerException, IOException {
 		out.println("/logout");
+	    newChatroom.setEnabled(false);
 		in.readLine();
 	}
 
@@ -555,8 +549,8 @@ public class ChatClient extends JFrame {
 			nameLabel.setText("Enter name: ");
 			portLabel.setText("Enter port: ");
 
-			nameTextfield.setText("");
-			portTextfield.setText("");
+			nameTextfield.setText("PrivateChatroom");
+			portTextfield.setText(((int)(Math.random()*(65535-1025))+1025)+"");
 
 			create.setText("Create");
 			close.setText("Close");
@@ -580,6 +574,43 @@ public class ChatClient extends JFrame {
 			create.setFont(new Font("Arial", Font.PLAIN, create.getHeight() / 2 + 1));
 			close.setFont(new Font("Arial", Font.PLAIN, close.getHeight() / 2 + 1));
 
+			nameTextfield.addFocusListener(new FocusListener() {
+				
+				@Override
+				public void focusLost(FocusEvent e) {
+					String text = nameTextfield.getText();
+					text = text.replaceAll(" ", "");
+					nameTextfield.setText(text);
+				}
+				
+				@Override
+				public void focusGained(FocusEvent e) {
+					nameTextfield.selectAll();			
+				}
+			});
+			
+			portTextfield.addFocusListener(new FocusListener() {
+				@Override
+				public void focusLost(FocusEvent e) {
+					String text = portTextfield.getText();
+					text = text.replaceAll("[^0-9]", "");
+					try {
+						int por = Integer.parseInt(text);
+						if (por < 1025 || por > 65535) {
+							text = ((int)(Math.random()*(65535-1025))+1025) + "";
+						}
+					} catch (NumberFormatException ex) {
+						text = ((int)(Math.random()*(65535-1025))+1025) + "";
+					}
+					portTextfield.setText(text);
+				}
+
+				@Override
+				public void focusGained(FocusEvent e) {
+					portTextfield.selectAll();
+				}
+			});
+			
 			create.addActionListener(e -> create());
 
 			close.addActionListener(e -> {
