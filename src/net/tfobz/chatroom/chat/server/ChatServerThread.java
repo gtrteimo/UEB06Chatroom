@@ -140,7 +140,7 @@ public class ChatServerThread implements Callable<Integer> {
 		t.setDaemon(true);
 		t.start();
 	}
-	
+
 	private void command(String commandString) {
 		try {
 			if (commandString.equals("/logout")) {
@@ -150,13 +150,12 @@ public class ChatServerThread implements Callable<Integer> {
 			} else if (commandString.startsWith("/msg")) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
-						if (t.username.equals(commandString.substring(3))) {
-							int firstSpace = commandString.indexOf(" ");
-							if (firstSpace != -1) {
-								int secondSpace = commandString.indexOf(" ", firstSpace + 1);
-								if (secondSpace != -1) {
-									commandString.substring(secondSpace + 1);
-									t.out.println(commandString.substring(secondSpace + 1));
+						int firstSpace = commandString.indexOf(" ");
+						if (firstSpace != -1) {
+							int secondSpace = commandString.indexOf(" ", firstSpace + 1);
+							if (secondSpace != -1) {
+								if (t.username.equals(commandString.substring(firstSpace,secondSpace-1))) {
+								t.out.println(commandString.substring(secondSpace + 1));
 								}
 							}
 						}
@@ -168,7 +167,7 @@ public class ChatServerThread implements Callable<Integer> {
 			} else if (commandString.equals("/listClients")) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
-						t.out.println(username);
+						out.println(t.username);
 					}
 				}
 			} else if (commandString.equals("/help")) {
