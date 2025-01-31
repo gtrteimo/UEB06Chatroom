@@ -76,21 +76,17 @@ public class ChatServer {
 		}
 		SERVER_ID = serverIDCounter++;
 	}
-	public ChatServer (String name, int port, ChatServerThread admin) {
+	public ChatServer (String name, int port, ChatServerThread admin) throws IOException {
 		this.name = name;
 		System.out.println(port);
-		try {
-			server = new ServerSocket(port);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		server = new ServerSocket(port);
 		System.out.println(port);
 		servers.add(this);
 		SERVER_ID = serverIDCounter++;
 	}
 	
 	void accept () {
+		System.out.println("Accept");
 		try {
 			while (true) {
 				Socket client = server.accept();

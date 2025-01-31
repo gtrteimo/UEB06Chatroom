@@ -261,22 +261,28 @@ public class ChatClient extends JFrame {
 	    
 	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 	    out = new PrintStream(client.getOutputStream());
+		System.out.println("End: IP: "+ip+", Port: "+port);
 	}
 	
 	public void connect() throws UnknownHostException, ConnectException, IOException {
 	   
 	    out.println(username);
-
+	    
+		System.out.println("Hilfe 3");
+	    
 	    if (in.readLine().equals("invalid")) {
 	    	CustomWarningDialog.showWarning("Username already in use");
 	    	client.close();
 	    	return;
 	    } 
+		System.out.println("Hilfe 4");
 	    
 	    String line = "";
 	    try {
+			System.out.println("Hilfe 5");
 	    	line = in.readLine();
 	        CLIENT_ID = Integer.parseInt(line); 
+			System.out.println("Hilfe 6");
 	    } catch (NumberFormatException e1) {
 	    	CLIENT_ID = -1;
 	    	textArea.setText("<html><head></head><body>"+line+"</body></html>");
@@ -376,7 +382,9 @@ public class ChatClient extends JFrame {
 						
 //						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						createConnection();
+						System.out.println("Hilfe 1");
 						connect();
+						System.out.println("Hilfe 1");
 						setVisible(false);
 					} catch (ConnectException ex) {
 						CustomWarningDialog.showWarning("Values are wrong!");
@@ -621,32 +629,12 @@ public class ChatClient extends JFrame {
 
 			try {
 				out.println("/newServer " + name + " " + port);
-			} catch (Exception e1) {
-				try {
-					client.close();
-				} catch (Exception e2) {
-				}
-			}
-
-			try {
 				logOut();
 				client.close();
-			} catch (NullPointerException | IOException e1) {
-				try {
-					client.close();
-				} catch (Exception e2) {
-				}
+			} catch (Exception e1) {
+				e1.printStackTrace();
+				try {client.close();} catch (Exception e2) {}
 			}
-
-//			try {
-//				createConnection();
-//				connect();
-//			} catch (NullPointerException | IOException e1) {
-//				try {
-//					client.close();
-//				} catch (Exception e2) {
-//				}
-//			}
 
 			setVisible(false);
 			dispose();

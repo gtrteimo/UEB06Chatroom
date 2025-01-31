@@ -133,19 +133,11 @@ public class ChatServerThread implements Callable<Integer> {
 	}
 
 	private void createServer(String prompt) throws NumberFormatException, IOException {
-		System.out.println("NEWWW222");
 		String[] s = prompt.split(" ");
-		System.out.println("NEWWW232");
-		System.out.println("s0: "+s[0]);
-		System.out.println("s1: "+s[1]);
-		System.out.println("s1i: "+Integer.parseInt(s[1]));
-		System.out.println("NEWWW333");
 		ChatServer c = new ChatServer(s[0], Integer.parseInt(s[1]), this);
 		owner.servers.add(c);
-		System.out.println("NEWWW");
 		owner.executer.submit(() -> {
-			JOptionPane.showMessageDialog(null, "NEWWWWWW");
-			System.out.println("NEWWW");
+			
 			c.accept();
 		});
 		
