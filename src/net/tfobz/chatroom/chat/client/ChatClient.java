@@ -266,13 +266,13 @@ public class ChatClient extends JFrame {
 	public void connect() throws UnknownHostException, ConnectException, IOException {
 	   
 	    out.println(username);
-//    	System.out.println("Vor Wrong username");
-	    while (in.readLine().equals("invalid")) {
-//	    	System.out.println("Wrong username");
-		    out.println(JOptionPane.showInputDialog(this, "Enter new username"));
-//	    	System.out.println("Wrong username2");
+
+	    if (in.readLine().equals("invalid")) {
+	    	CustomWarningDialog.showWarning("Username already in use");
+	    	client.close();
+	    	return;
 	    } 
-//    	System.out.println("Nach Wrong username");
+	    
 	    String line = "";
 	    try {
 	    	line = in.readLine();
@@ -281,15 +281,9 @@ public class ChatClient extends JFrame {
 	    	CLIENT_ID = -1;
 	    	textArea.setText("<html><head></head><body>"+line+"</body></html>");
 	    	CustomWarningDialog.showWarning("Using not native Server!");
-//	        e1.printStackTrace();
 	    } catch (IOException e1) {
 	        e1.printStackTrace();
-	    }
-	    
-//	    System.out.println("Hall01");
-//	    System.out.println("Hall02 "+ in.readLine());
-//	    System.out.println("Hall03");
-	    
+	    }	    
 	    executer.submit(new ChatClientThread(this, in, textArea));
 	}
 
@@ -379,6 +373,7 @@ public class ChatClient extends JFrame {
 							port = Integer.valueOf(textFieldPort.getText());
 						}
 						username = textFieldUsername.getText();
+						
 //						System.out.println("IP: "+ip+", Port: "+port+", user: "+username);
 						createConnection();
 						connect();
