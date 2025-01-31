@@ -16,6 +16,8 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.tfobz.chatroom.chat.client.ChatClient;
+
 public class ChatServer {
 	
 	public Object LOCK = new Object();
@@ -30,6 +32,8 @@ public class ChatServer {
 	public static final int DEFAULT_PORT = 10000;
 	private int port = DEFAULT_PORT;
 	
+	private ChatClient admin;
+	
 	public String name = "Main Chatroom";
 	public String password = null;
 	
@@ -40,9 +44,8 @@ public class ChatServer {
 	private ExecutorService executer;
 	
 	ArrayList<ChatServerThread> serverThreads = new ArrayList<ChatServerThread>();
-	
-	HashMap<String, Integer> serverPorts = new HashMap<String, Integer>();
-	
+	ArrayList<ChatServer> servers = new ArrayList<ChatServer>();
+		
 	public ChatServer () throws IOException, NumberFormatException{
 		executer = Executors.newCachedThreadPool();
 		consoleIn = new Scanner(System.in);
@@ -58,7 +61,7 @@ public class ChatServer {
 				server = new ServerSocket(port);
 				System.out.println("Chat server started");
 				repeat = false;
-				serverPorts.put("Main", port);
+				servers.add(this);
 			} catch (BindException ex) {
 				throw new IOException("Port already in use!");
 			} catch (NoSuchElementException ex) {
@@ -73,12 +76,13 @@ public class ChatServer {
 		}
 		SERVER_ID = serverIDCounter++;
 	}
-	public ChatServer (String name) {
-		
+	public ChatServer (String name, int port, ChatServerThread admin) throws IOException {
+		server = new ServerSocket(port);
+		servers.add(this);
 		SERVER_ID = serverIDCounter++;
 	}
 	
-	private void accept () {
+	void accept () {
 		try {
 			while (true) {
 				Socket client = server.accept();

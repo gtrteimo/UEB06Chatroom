@@ -130,6 +130,17 @@ public class ChatServerThread implements Callable<Integer> {
 		}
 	}
 
+	private void createServer(String prompt) throws NumberFormatException, IOException {
+		String[] s = prompt.split(" ");
+		ChatServer c = new ChatServer(s[0], Integer.parseInt(s[1]), this);
+		owner.servers.add(c);
+		Thread t = new Thread(() -> {
+			c.accept();
+		});
+		t.setDaemon(true);
+		t.start();
+	}
+	
 	private void command(String commandString) {
 	    try {
 	        if (commandString.equals("/logout")) {
