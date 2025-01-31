@@ -27,14 +27,27 @@ public class ChatClientThread implements Callable<Integer> {
 			while (line!=null) {
 				line = in.readLine();
 				if (line != null) {
-					String text = textArea.getText();
-					if (text!=null&&!text.isEmpty()) {
-						text+="\n";
-					}
-					System.out.println(line);
-					textArea.setText(text+line);
-				}				
-				
+				    String text = textArea.getText();
+
+				    int bodyStart = text.indexOf("<body>") + 6;
+				    int bodyEnd = text.indexOf("</body>");
+
+				    if (bodyStart > 6 && bodyEnd > bodyStart) {
+				        String bodyContent = text.substring(bodyStart, bodyEnd).trim();
+
+				        bodyContent = bodyContent.replaceAll("(?i)<p[^>]*>\\s*</p>", "");
+				        
+				        if (!bodyContent.isEmpty() && !bodyContent.endsWith("<br>")) {
+				            bodyContent += "<br>";
+				        }
+
+				        bodyContent += line;
+
+				        text = text.substring(0, bodyStart) + bodyContent + text.substring(bodyEnd);
+				    }
+
+				    textArea.setText(text);
+				}	
 			}
 		} catch (SocketException e) {
 			System.out.println("Connection to Chatserver lost");

@@ -60,14 +60,13 @@ public class ChatClient extends JFrame {
 	private Container contentPane;
 
 	private JScrollPane scrollPane1;
-	private JScrollPane scrollPane2;
 
 	private JButton newChatroom;
 	private JButton logIn;
 	private JButton exit;
 	
 	private JEditorPane textArea;
-	private JEditorPane textField;
+	private JTextField textField;
 	private JButton button;
 
 	private Socket client;
@@ -130,7 +129,6 @@ public class ChatClient extends JFrame {
 		int h = getHeight() - 40;
 
 		scrollPane1 = new JScrollPane();
-		scrollPane2 = new JScrollPane();
 
 		newChatroom = new JButton();
 		logIn = new JButton();
@@ -142,13 +140,9 @@ public class ChatClient extends JFrame {
 				return true;
 			}
 		};
-		textArea.setText("text/html");
-		textField = new JEditorPane() {
-			@Override
-			public boolean getScrollableTracksViewportWidth() {
-				return true;
-			}
-		};
+		textArea.setContentType("text/html");
+		textField = new JTextField(); 
+	
 		button = new JButton();
 
 		newChatroom.setText("New Chatroom");;
@@ -161,14 +155,14 @@ public class ChatClient extends JFrame {
 		button.setText("Send");
 		
 		scrollPane1.setBounds(10, 10 + 60, w - 20, h - 20 - 60 - 60);
-		scrollPane2.setBounds(10, h - 60, w - 200, 50);
+		textField.setBounds(10, h - 60, w - 200, 50);
 		newChatroom.setBounds(10, 10, (w-20-20)/3, 50);
 		logIn.setBounds(1*(w-20)/3 + 15 + 10, 10, (w-20)/3 - 20, 50);
 		exit.setBounds( 2*(w-20)/3 + 10 + 20, 10, (w-20)/3 - 20, 50);
 		button.setBounds(10 + w - 190, h - 60, 170, 50);
 
-		textArea.setFont(new Font("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
-		textField.setFont(new Font("Arial", Font.PLAIN, scrollPane2.getHeight() / 2 + 1));
+		textArea.setFont(new Font("Arial", Font.PLAIN, textField.getHeight() / 2 + 1));
+		textField.setFont(new Font("Arial", Font.PLAIN, textField.getHeight() / 2 + 1));
 		newChatroom.setFont(new Font("Arial", Font.PLAIN, newChatroom.getHeight() / 2 + 1));
 		logIn.setFont(new Font("Arial", Font.PLAIN, logIn.getHeight() / 2 + 1));
 		exit.setFont(new Font("Arial", Font.PLAIN, exit.getHeight() / 2 + 1));
@@ -188,7 +182,7 @@ public class ChatClient extends JFrame {
 		button.setForeground(colours[0][2]);
 
 		scrollPane1.setBorder(null);
-		scrollPane2.setBorder(null);
+		textField.setBorder(null);
 		textArea.setBorder(null);
 		textField.setBorder(null);
 		newChatroom.setBorder(null);
@@ -202,12 +196,8 @@ public class ChatClient extends JFrame {
 		button.setFocusPainted(false);
 
 		scrollPane1.setViewportView(textArea);
-		scrollPane2.setViewportView(textField);
 
 		scrollPane1.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-		scrollPane2.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPane2.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
@@ -248,7 +238,7 @@ public class ChatClient extends JFrame {
 		button.addActionListener(e -> send());
 
 		contentPane.add(scrollPane1);
-		contentPane.add(scrollPane2);
+		contentPane.add(textField);
 		contentPane.add(newChatroom);
 		contentPane.add(logIn);
 		contentPane.add(exit);
@@ -264,17 +254,28 @@ public class ChatClient extends JFrame {
 	    
 	    in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 	    out = new PrintStream(client.getOutputStream());
-
+	   
 	    out.println(username);
 	    
+	    while (in.readLine().equals("invalid")) {
+		    out.println(JOptionPane.showInputDialog(this, "Enter new username"));
+	    } 
+	    String line = "";
 	    try {
-	        CLIENT_ID = Integer.parseInt(in.readLine()); 
+	    	line = in.readLine();
+	        CLIENT_ID = Integer.parseInt(line); 
 	    } catch (NumberFormatException e1) {
-	        e1.printStackTrace();
+	    	CLIENT_ID = -1;
+	    	textArea.setText("<html><head></head><body>"+line+"</body></html>");
+//	        e1.printStackTrace();
 	    } catch (IOException e1) {
 	        e1.printStackTrace();
 	    }
-	    	    	    
+	    
+	    System.out.println("Hall01");
+//	    System.out.println("Hall02 "+ in.readLine());
+	    System.out.println("Hall03");
+	    
 	    executer.submit(new ChatClientThread(this, in, textArea));
 	}
 
@@ -285,6 +286,8 @@ public class ChatClient extends JFrame {
 				String textOld = textArea.getText().trim().replaceAll("\n", "");
 				if (!textOld.isEmpty()) {
 					textOld += "\n";
+				} else {
+					
 				}
 				out.println(textNew);
 			}
