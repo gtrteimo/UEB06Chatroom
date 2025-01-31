@@ -167,8 +167,9 @@ public class ChatServerThread implements Callable<Integer> {
 						if (firstSpace != -1) {
 							int secondSpace = commandString.indexOf(" ", firstSpace + 1);
 							if (secondSpace != -1) {
-								if (t.username.equals(commandString.substring(firstSpace,secondSpace-1))) {
-								t.out.println(commandString.substring(secondSpace + 1));
+								System.out.println(commandString.substring(firstSpace+1,secondSpace));
+								if (t.username.equals(commandString.substring(firstSpace+1,secondSpace))) {
+									t.out.println(commandString.substring(secondSpace + 1));
 								}
 							}
 						}
