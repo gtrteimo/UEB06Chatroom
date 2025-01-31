@@ -15,17 +15,17 @@ public class ChatServerThread implements Callable<Integer> {
 	};
 	
 	private static int ClientIDCounter = 0;
-	
+
 	public final int CLIENT_ID;
-	
+
 	private ChatServer owner;
 	private Socket client;
 	public BufferedReader in;
 	public PrintStream out;
 	private String username;
 	private String colorUsername;
-	
-	public ChatServerThread(ChatServer owner, Socket client) throws IOException, IllegalArgumentException{
+
+	public ChatServerThread(ChatServer owner, Socket client) throws IOException, IllegalArgumentException {
 		this.owner = owner;
 		this.client = client;
 		in = new BufferedReader(new InputStreamReader(client.getInputStream()));
@@ -36,7 +36,7 @@ public class ChatServerThread implements Callable<Integer> {
 		}
 		CLIENT_ID = ClientIDCounter++;
 	}
-	
+
 	@Override
 	public Integer call() throws Exception {
 	    try {
@@ -70,27 +70,28 @@ public class ChatServerThread implements Callable<Integer> {
 
 	        System.out.println(username + " signed in. " + owner.serverThreads.size() + " users");
 
-	        for (ChatServerThread t : owner.serverThreads) {
-	            t.out.println(colorUsername + " signed in");
-	        }
+			synchronized (owner.LOCK) {
+				for (ChatServerThread t : owner.serverThreads) {
+					t.out.println(colorUsername + " signed in");
+				}
+			}
 
-	        readInput();
+			readInput();
+			signOut();
 
-	        signOut();
+		} catch (IOException e) {
+			signOut();
 
-	    } catch (IOException e) {
-	        signOut();
-
-	    } finally {
-	        try {
-	            client.close();
-	        } catch (Exception e1) {
-	            ;
-	        }
-	    }
-	    return 0;
+		} finally {
+			try {
+				client.close();
+			} catch (Exception e1) {
+				;
+			}
+		}
+		return 0;
 	}
-	
+
 	private void readInput() throws IOException {
 		boolean running = true;
 	    String line = in.readLine();
@@ -116,8 +117,19 @@ public class ChatServerThread implements Callable<Integer> {
 		owner.serverThreads.remove(this);
 		System.out.println(username + " signed out. " + owner.serverThreads.size() + " users");
 	}
-	
-	private void command (String commandString) {
+
+	private void signOut() {
+		synchronized (owner.LOCK) {
+			for (ChatServerThread t : owner.serverThreads) {
+
+				t.out.println(colorUsername + " signed out");
+			}
+			owner.serverThreads.remove(this);
+			System.out.println(colorUsername + " signed out. " + owner.serverThreads.size() + " users");
+		}
+	}
+
+	private void command(String commandString) {
 		switch (commandString) {
 		case "logout":
 			try {
