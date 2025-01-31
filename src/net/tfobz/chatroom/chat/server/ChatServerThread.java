@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.Random;
 import java.util.concurrent.Callable;
 
 public class ChatServerThread implements Callable<Integer> {
@@ -22,6 +23,7 @@ public class ChatServerThread implements Callable<Integer> {
 	private Socket client;
 	public BufferedReader in;
 	public PrintStream out;
+    private Color color;
 	private String username;
 	private String colorUsername;
 
@@ -60,7 +62,8 @@ public class ChatServerThread implements Callable<Integer> {
 	        System.out.println(CLIENT_ID);
 	        out.println(CLIENT_ID);
 	        
-	        Color color = Color.RED;
+	        Random rand = new Random();
+	        color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
 	        String colour = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
 	        colorUsername = "<span style=\"color: " + colour + ";\">" + username + "</span>";
 	        
@@ -110,14 +113,6 @@ public class ChatServerThread implements Callable<Integer> {
 	    }
 	}
 	
-	private void signOut () {
-    	for (ChatServerThread t : owner.serverThreads) {
-			t.out.println(colorUsername + " signed out");
-		}
-		owner.serverThreads.remove(this);
-		System.out.println(username + " signed out. " + owner.serverThreads.size() + " users");
-	}
-
 	private void signOut() {
 		synchronized (owner.LOCK) {
 			for (ChatServerThread t : owner.serverThreads) {
@@ -130,16 +125,34 @@ public class ChatServerThread implements Callable<Integer> {
 	}
 
 	private void command(String commandString) {
-		switch (commandString) {
-		case "logout":
-			try {
-				client.close();
-			} catch (IOException e) {}
-			break;
-		case "help":
-			
-		default:
-			out.println("Unknown Command! Type /help to get a list of Commands");
-		}
+	    try {
+	        if (commandString.equals("/logout")) {
+	            client.close();
+	        } else if (commandString.equals("/newServer")) {
+	            out.println("Creating a new server...");
+	        } else if (commandString.startsWith("/msg")) {
+	    		synchronized (owner.LOCK) {
+	    			for (ChatServerThread t : owner.serverThreads) {
+	    				if (t.username.equals(commandString.substring(3))) {
+	    					t.out.println();
+	    				}
+	    			}
+	    		}
+	        } else if (commandString.equals("/changeColour")) {
+		        Random rand = new Random();
+		        color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
+	            out.println("Changing colour...");
+	        } else if (commandString.equals("/listClients")) {
+	            // Add logic to list clients
+	            out.println("Listing all clients...");
+	        } else if (commandString.equals("/help")) {
+	            out.println("Available commands: /logout, /newServer, /msg, /changeColour, /listClients");
+	        } else {
+	            out.println("Unknown Command! Type /help to get a list of commands");
+	        }
+	    } catch (IOException e) {
+	        out.println("An error occurred while executing the command.");
+	    }
 	}
+
 }
