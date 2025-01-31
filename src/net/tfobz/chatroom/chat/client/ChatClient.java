@@ -491,23 +491,20 @@ public class ChatClient extends JFrame {
 
 		private JLabel nameLabel;
 		private JLabel portLabel;
-		private JLabel passwordLabel;
 
 		private JTextField nameTextfield;
 		private JTextField portTextfield;
-		private JTextField passwordTextfield;
 
 		private JButton create;
 		private JButton close;
 
 		private String name = null;
-		private String password = null;
 
 		public NewChatroomDialog(ChatClient owner) {
 			super(owner, "New Chatroom", true);
 			setResizable(false);
 			setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-			setBounds(owner.getX(), owner.getY(), 1080, 720);
+			setBounds(owner.getX(), owner.getY(), 430, 250);
 
 			contentPane = getContentPane();
 			contentPane.setLayout(null);
@@ -519,9 +516,6 @@ public class ChatClient extends JFrame {
 			portLabel = new JLabel();
 			portLabel.setForeground(colours[0][3]);
 
-			passwordLabel = new JLabel();
-			passwordLabel.setForeground(colours[0][3]);
-
 			nameTextfield = new JTextField();
 			nameTextfield.setBackground(colours[0][2]);
 			nameTextfield.setForeground(colours[0][3]);
@@ -531,11 +525,6 @@ public class ChatClient extends JFrame {
 			portTextfield.setBackground(colours[0][2]);
 			portTextfield.setForeground(colours[0][3]);
 			portTextfield.setBorder(null);
-
-			passwordTextfield = new JTextField();
-			passwordTextfield.setBackground(colours[0][2]);
-			passwordTextfield.setForeground(colours[0][3]);
-			passwordTextfield.setBorder(null);
 
 			create = new JButton();
 			create.setBackground(colours[0][4]);
@@ -549,13 +538,11 @@ public class ChatClient extends JFrame {
 			close.setFocusPainted(false);
 			close.setBorderPainted(false);
 
-			nameLabel.setText("Enter name of the new Server: ");
-			portLabel.setText("Enter port of the new Server: ");
-			passwordLabel.setText("Enter password of the new Server: ");
+			nameLabel.setText("Enter name: ");
+			portLabel.setText("Enter port: ");
 
 			nameTextfield.setText("");
 			portTextfield.setText("");
-			passwordTextfield.setText("");
 
 			create.setText("Create");
 			close.setText("Close");
@@ -566,9 +553,6 @@ public class ChatClient extends JFrame {
 			portLabel.setBounds(10, 70, 2 * getWidth() / 5 - 6 - 20, 50);
 			portLabel.setFont(new Font("Arial", Font.PLAIN, portLabel.getHeight() / 2 + 1));
 
-			passwordLabel.setBounds(10, 130, 2 * getWidth() / 5 - 6 - 20, 50);
-			passwordLabel.setFont(new Font("Arial", Font.PLAIN, portLabel.getHeight() / 2 + 1));
-
 			nameTextfield.setBounds(10 + 2 * getWidth() / 5 - 6 - 10, 10, 3 * getWidth() / 5 - 6 - 20, 50);
 			nameTextfield.setFont(new Font("Arial", Font.PLAIN, nameTextfield.getHeight() / 2 + 1));
 			nameTextfield.setBorder(null);
@@ -577,12 +561,8 @@ public class ChatClient extends JFrame {
 			portTextfield.setFont(new Font("Arial", Font.PLAIN, portTextfield.getHeight() / 2 + 1));
 			portTextfield.setBorder(null);
 
-			passwordTextfield.setBounds(10 + 2 * getWidth() / 5 - 6 - 10, 130, 3 * getWidth() / 5 - 6 - 20, 50);
-			passwordTextfield.setFont(new Font("Arial", Font.PLAIN, portTextfield.getHeight() / 2 + 1));
-			passwordTextfield.setBorder(null);
-
-			create.setBounds(10, 615, ((getWidth() - 6) / 2) - 10, 55);
-			close.setBounds(((getWidth() - 6) / 2) + 10, 615, ((getWidth() - 6) / 2) - 10, 55);
+			create.setBounds(5, 150, ((getWidth() - 15) / 2) - 10, 55);
+			close.setBounds(((getWidth() - 15) / 2) + 5, 150, ((getWidth() - 15) / 2) - 10, 55);
 			create.setFont(new Font("Arial", Font.PLAIN, create.getHeight() / 2 + 1));
 			close.setFont(new Font("Arial", Font.PLAIN, close.getHeight() / 2 + 1));
 
@@ -595,11 +575,9 @@ public class ChatClient extends JFrame {
 
 			contentPane.add(nameLabel);
 			contentPane.add(portLabel);
-			contentPane.add(passwordLabel);
 
 			contentPane.add(nameTextfield);
 			contentPane.add(portTextfield);
-			contentPane.add(passwordTextfield);
 
 			contentPane.add(create);
 			contentPane.add(close);
@@ -612,10 +590,9 @@ public class ChatClient extends JFrame {
 			} else {
 				port = Integer.valueOf(portTextfield.getText());
 			}
-			password = passwordTextfield.getText().trim().replaceAll("\n", "");
 
 			try {
-				out.println("/Chatroom(" + name + ", " + password + ", " + port + ")");
+				out.println("/Chatroom(" + name + ", " + port + ")");
 			} catch (Exception e1) {
 				try {
 					client.close();
