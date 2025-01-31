@@ -293,7 +293,9 @@ public class ChatClient extends JFrame {
 			String textNew = textField.getText().trim().replaceAll("\n", "");
 			if (!textNew.isEmpty()) {
 				if (textNew.equals("\\clear")) {
-			    	textArea.setText("<html><head></head><body>"+"</body></html>");
+					synchronized (textArea) {
+						textArea.setText("<html><head></head><body>"+"</body></html>");
+					}
 				} else {
 					out.println(textNew);
 				}

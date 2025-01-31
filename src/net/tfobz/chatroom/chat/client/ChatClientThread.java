@@ -27,7 +27,10 @@ public class ChatClientThread implements Callable<Integer> {
 			while (line!=null) {
 				line = in.readLine();
 				if (line != null) {
-				    String text = textArea.getText();
+					String text = "";
+					synchronized (textArea) {
+					     text = textArea.getText();
+					}
 
 				    int bodyStart = text.indexOf("<body>") + 6;
 				    int bodyEnd = text.indexOf("</body>");
@@ -45,11 +48,36 @@ public class ChatClientThread implements Callable<Integer> {
 
 				        text = text.substring(0, bodyStart) + bodyContent + text.substring(bodyEnd);
 				    }
-
-				    textArea.setText(text);
+					synchronized (textArea) {
+						textArea.setText(text);
+					}
 				}	
 			}
 		} catch (SocketException e) {
+			String text = "";
+			synchronized (textArea) {
+			     text = textArea.getText();
+			}
+
+		    int bodyStart = text.indexOf("<body>") + 6;
+		    int bodyEnd = text.indexOf("</body>");
+
+		    if (bodyStart > 6 && bodyEnd > bodyStart) {
+		        String bodyContent = text.substring(bodyStart, bodyEnd).trim();
+
+		        bodyContent = bodyContent.replaceAll("(?i)<p[^>]*>\\s*</p>", "");
+		        
+		        if (!bodyContent.isEmpty() && !bodyContent.endsWith("<br>")) {
+		            bodyContent += "<br>";
+		        }
+
+		        bodyContent += "Connection to Chatserver lost";
+
+		        text = text.substring(0, bodyStart) + bodyContent + text.substring(bodyEnd);
+		    }
+			synchronized (textArea) {
+				textArea.setText(text);
+			}
 			System.out.println("Connection to Chatserver lost");
 		} catch (IOException e) {
 			e.printStackTrace();
