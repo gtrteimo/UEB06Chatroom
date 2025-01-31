@@ -11,6 +11,7 @@ public class CustomWarningDialog extends JDialog {
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		getContentPane().setLayout(null);
+		setResizable(false);
 		try {
 			setIconImage(new ImageIcon(getClass().getResource("/icons/warningIco.png")).getImage());
 		} catch (NullPointerException e) {
