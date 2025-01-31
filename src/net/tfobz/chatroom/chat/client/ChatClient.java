@@ -372,8 +372,7 @@ public class ChatClient extends JFrame {
 						connect();
 						setVisible(false);
 					} catch (ConnectException ex) {
-						CustomWarningDialog.showWarning("Values where wrong!");
-//						JOptionPane.showMessageDialog(ChatLogin.this, "Values where wrong! No Server found at ip \""+ip+"\" and port \""+port+"\"", "Error", JOptionPane.ERROR_MESSAGE);
+						CustomWarningDialog.showWarning("Values are wrong!");
 					} catch (IOException ex) {
 						CustomWarningDialog.showWarning("Couldn't connect to Server!");
 						ex.printStackTrace();
