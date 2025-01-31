@@ -175,8 +175,9 @@ public class ChatServerThread implements Callable<Integer> {
 						if (firstSpace != -1) {
 							int secondSpace = commandString.indexOf(" ", firstSpace + 1);
 							if (secondSpace != -1) {
-								if (t.username.equals(commandString.substring(firstSpace,secondSpace-1))) {
-								t.out.println(commandString.substring(secondSpace + 1));
+								System.out.println(commandString.substring(firstSpace+1,secondSpace));
+								if (t.username.equals(commandString.substring(firstSpace+1,secondSpace))) {
+									t.out.println(commandString.substring(secondSpace + 1));
 								}
 							}
 						}
@@ -185,7 +186,7 @@ public class ChatServerThread implements Callable<Integer> {
 			} else if (commandString.startsWith(commands[4])) {
 				Random rand = new Random();
 				color = new Color(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-			} else if (commandString.startsWith(commands[4])) {
+			} else if (commandString.startsWith(commands[5])) {
 				synchronized (owner.LOCK) {
 					for (ChatServerThread t : owner.serverThreads) {
 						out.println(t.username);
